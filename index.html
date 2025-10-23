@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Gestión Social IE N°11017</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
+        <!-- Logo y título -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Sistema de Gestión Social</h1>
+            <p class="text-gray-600 text-sm mt-2">IE N°11017 "José Olaya Balandra"</p>
+        </div>
+
+        <!-- Formulario de login -->
+        <form id="loginForm" class="space-y-6">
+            <!-- Usuario -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                    Usuario
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        placeholder="Ingrese su usuario"
+                        required
+                    >
+                </div>
+                <p id="usernameError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Contraseña -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                    Contraseña
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        placeholder="Ingrese su contraseña"
+                        required
+                    >
+                </div>
+                <p id="passwordError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Recordar sesión -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input
+                        id="remember"
+                        name="remember"
+                        type="checkbox"
+                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+                    >
+                    <label for="remember" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                        Recordar sesión
+                    </label>
+                </div>
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500 transition">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mensaje de error general -->
+            <div id="generalError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span id="generalErrorMessage"></span>
+                </div>
+            </div>
+
+            <!-- Botón de ingreso -->
+            <button
+                type="submit"
+                class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition transform hover:scale-105 active:scale-95"
+            >
+                INGRESAR
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-sm text-gray-500">
+            <p>© 2025 IE N°11017 - Chiclayo, Perú</p>
+        </div>
+    </div>
+
+    <script>
+        // Validación del formulario
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Limpiar errores previos
+            clearErrors();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            let hasErrors = false;
+
+            // Validar usuario
+            if (username === '') {
+                showError('username', '⚠️ El campo usuario es obligatorio');
+                hasErrors = true;
+            } else if (username.length < 3) {
+                showError('username', '⚠️ El usuario debe tener al menos 3 caracteres');
+                hasErrors = true;
+            }
+
+            // Validar contraseña
+            if (password === '') {
+                showError('password', '⚠️ El campo contraseña es obligatorio');
+                hasErrors = true;
+            } else if (password.length < 4) {
+                showError('password', '⚠️ La contraseña debe tener al menos 4 caracteres');
+                hasErrors = true;
+            }
+
+            // Si hay errores, mostrar mensaje general
+            if (hasErrors) {
+                showGeneralError('Por favor, completa todos los campos correctamente');
+                return;
+            }
+
+            // Si todo está bien, redirigir al dashboard
+            window.location.href = 'dashboard.html';
+        });
+
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(fieldId + 'Error');
+
+            field.classList.add('border-red-500');
+            field.classList.remove('border-gray-300');
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+
+        function showGeneralError(message) {
+            const errorDiv = document.getElementById('generalError');
+            const errorMessage = document.getElementById('generalErrorMessage');
+
+            errorMessage.textContent = message;
+            errorDiv.classList.remove('hidden');
+
+            // Auto-ocultar después de 5 segundos
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        function clearErrors() {
+            // Limpiar errores de campos
+            ['username', 'password'].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                const errorElement = document.getElementById(fieldId + 'Error');
+
+                field.classList.remove('border-red-500');
+                field.classList.add('border-gray-300');
+                errorElement.classList.add('hidden');
+            });
+
+            // Limpiar error general
+            document.getElementById('generalError').classList.add('hidden');
+        }
+
+        // Limpiar errores al escribir
+        ['username', 'password'].forEach(fieldId => {
+            document.getElementById(fieldId).addEventListener('input', function() {
+                this.classList.remove('border-red-500');
+                this.classList.add('border-gray-300');
+                document.getElementById(fieldId + 'Error').classList.add('hidden');
+                document.getElementById('generalError').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

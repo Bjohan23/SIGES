@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrevista - Sistema de Gestión Social IE N°11017</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Toast notification -->
+    <div id="toast" class="hidden fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg toast">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <span class="ml-3 text-lg font-semibold text-gray-800 hidden sm:block">IE N°11017</span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="dashboard.html" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">Dashboard</a>
+                    <a href="ficha-social.html" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">Fichas Sociales</a>
+                    <a href="entrevista.html" class="px-3 py-2 rounded-lg text-sm font-medium bg-indigo-100 text-indigo-700">Entrevistas</a>
+                    <a href="familias-disfuncionales.html" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">Familias Disfuncionales</a>
+                    <a href="index.html" class="px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition">Cerrar Sesión</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="mobileMenuButton" class="text-gray-700 hover:text-gray-900 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="dashboard.html" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100">Dashboard</a>
+                <a href="ficha-social.html" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100">Fichas Sociales</a>
+                <a href="entrevista.html" class="block px-3 py-2 rounded-lg text-base font-medium bg-indigo-100 text-indigo-700">Entrevistas</a>
+                <a href="familias-disfuncionales.html" class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100">Familias Disfuncionales</a>
+                <a href="index.html" class="block px-3 py-2 rounded-lg text-base font-medium text-red-600 hover:bg-red-50">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Entrevista al Estudiante</h1>
+            <p class="text-gray-600 mt-1">Formulario de entrevista para evaluación socioemocional</p>
+        </div>
+
+        <!-- Formulario de entrevista -->
+        <form id="entrevistaForm" class="space-y-6">
+            <!-- Datos del Estudiante -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Datos del Estudiante</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo del Estudiante *</label>
+                        <input type="text" name="nombreEstudiante" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">DNI *</label>
+                        <input type="text" name="dni" pattern="[0-9]{8}" maxlength="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="12345678" required>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Grado y Sección *</label>
+                        <input type="text" name="gradoSeccion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: 3° A" required>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Entrevista *</label>
+                        <input type="date" name="fechaEntrevista" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Entrevistador *</label>
+                        <input type="text" name="entrevistador" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Nombre del responsable de la entrevista" required>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preguntas de la Entrevista -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Preguntas de Evaluación</h2>
+
+                <div class="space-y-6">
+                    <!-- Pregunta 1 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            1. ¿Cómo te sientes en tu casa? ¿Te sientes seguro y querido? *
+                        </label>
+                        <textarea name="pregunta1" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 2 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            2. ¿Con quién vives? ¿Cómo es la relación con las personas que viven contigo? *
+                        </label>
+                        <textarea name="pregunta2" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 3 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            3. ¿Tus padres o cuidadores te ayudan con las tareas de la escuela? *
+                        </label>
+                        <textarea name="pregunta3" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 4 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            4. ¿Tienes amigos en la escuela? ¿Cómo te llevas con tus compañeros? *
+                        </label>
+                        <textarea name="pregunta4" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 5 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            5. ¿Qué haces cuando terminas las clases? ¿Tienes tiempo para jugar? *
+                        </label>
+                        <textarea name="pregunta5" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 6 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            6. ¿Comes bien en casa? ¿Qué comidas te dan tus padres normalmente? *
+                        </label>
+                        <textarea name="pregunta6" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 7 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            7. ¿Alguna vez te has sentido triste o preocupado? ¿Por qué? *
+                        </label>
+                        <textarea name="pregunta7" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 8 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            8. ¿Hay algo en tu casa o escuela que te moleste o te haga sentir mal? *
+                        </label>
+                        <textarea name="pregunta8" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 9 -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            9. ¿Qué te gusta hacer en tu tiempo libre? ¿Tienes algún pasatiempo o actividad favorita? *
+                        </label>
+                        <textarea name="pregunta9" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <!-- Pregunta 10 -->
+                    <div class="pb-6">
+                        <label class="block text-sm font-medium text-gray-900 mb-3">
+                            10. ¿Hay algo que quieras contarme o que creas que es importante que sepa? *
+                        </label>
+                        <textarea name="pregunta10" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escribe la respuesta del estudiante..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observaciones del Entrevistador -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Observaciones del Entrevistador</h2>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Actitud del estudiante durante la entrevista *</label>
+                        <select name="actitudEstudiante" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Seleccione...</option>
+                            <option value="Colaborativa">Colaborativa</option>
+                            <option value="Tímida">Tímida</option>
+                            <option value="Defensiva">Defensiva</option>
+                            <option value="Nerviosa">Nerviosa</option>
+                            <option value="Tranquila">Tranquila</option>
+                        </select>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nivel de comunicación *</label>
+                        <select name="nivelComunicacion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Seleccione...</option>
+                            <option value="Muy bueno">Muy bueno</option>
+                            <option value="Bueno">Bueno</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Limitado">Limitado</option>
+                        </select>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones generales y recomendaciones *</label>
+                        <textarea name="observacionesGenerales" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Incluya conclusiones, señales de alerta detectadas, y recomendaciones de seguimiento..." required></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">¿Se detectaron indicadores de riesgo? *</label>
+                        <div class="flex gap-6">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="indicadoresRiesgo" value="Si" class="mr-2" required>
+                                <span class="text-sm">Sí</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="indicadoresRiesgo" value="No" class="mr-2">
+                                <span class="text-sm">No</span>
+                            </label>
+                        </div>
+                        <p class="text-red-500 text-sm mt-1 hidden error-message"></p>
+                    </div>
+
+                    <div id="detalleRiesgo" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Especifique los indicadores de riesgo detectados</label>
+                        <textarea name="detalleIndicadores" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describa los indicadores de riesgo observados..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje de error general -->
+            <div id="generalError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span id="generalErrorMessage"></span>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex flex-col sm:flex-row gap-3 justify-end">
+                    <button type="button" onclick="guardarBorrador()" class="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition font-medium">
+                        Guardar Borrador
+                    </button>
+                    <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+                        Finalizar Entrevista
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        // Menú móvil
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', function(event) {
+            const isClickInside = mobileMenuButton.contains(event.target) || mobileMenu.contains(event.target);
+            if (!isClickInside && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        // Mostrar campo de detalle cuando se selecciona "Sí" en indicadores de riesgo
+        const indicadoresRiesgo = document.querySelectorAll('[name="indicadoresRiesgo"]');
+        const detalleRiesgo = document.getElementById('detalleRiesgo');
+
+        indicadoresRiesgo.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'Si') {
+                    detalleRiesgo.classList.remove('hidden');
+                } else {
+                    detalleRiesgo.classList.add('hidden');
+                }
+            });
+        });
+
+        // Función para guardar borrador
+        function guardarBorrador() {
+            mostrarToast('✅ Borrador guardado exitosamente');
+        }
+
+        // Función para mostrar toast
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.textContent = mensaje;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Validación del formulario
+        document.getElementById('entrevistaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Limpiar errores previos
+            clearErrors();
+
+            let hasErrors = false;
+            const formData = new FormData(this);
+
+            // Validar campos requeridos
+            const camposRequeridos = this.querySelectorAll('[required]');
+            camposRequeridos.forEach(campo => {
+                if (campo.type === 'radio') {
+                    const radioGroup = this.querySelectorAll(`[name="${campo.name}"]`);
+                    const algunoMarcado = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!algunoMarcado) {
+                        showFieldError(campo, '⚠️ Debe seleccionar una opción');
+                        hasErrors = true;
+                    }
+                } else if (campo.value.trim() === '' || (campo.tagName === 'SELECT' && campo.value === '')) {
+                    showFieldError(campo, '⚠️ Este campo es obligatorio');
+                    hasErrors = true;
+                } else if (campo.type === 'text' && campo.pattern) {
+                    const regex = new RegExp(campo.pattern);
+                    if (!regex.test(campo.value)) {
+                        if (campo.name === 'dni') {
+                            showFieldError(campo, '⚠️ El DNI debe tener 8 dígitos');
+                        } else {
+                            showFieldError(campo, '⚠️ Formato inválido');
+                        }
+                        hasErrors = true;
+                    }
+                } else if (campo.tagName === 'TEXTAREA' && campo.value.trim().length < 5) {
+                    showFieldError(campo, '⚠️ La respuesta debe tener al menos 5 caracteres');
+                    hasErrors = true;
+                }
+            });
+
+            if (hasErrors) {
+                showGeneralError('⚠️ Por favor completa todos los campos requeridos correctamente');
+
+                // Scroll al primer error
+                const primerError = document.querySelector('.border-red-500');
+                if (primerError) {
+                    primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            // Si todo está correcto, mostrar mensaje de éxito
+            mostrarToast('✅ Entrevista guardada exitosamente');
+
+            // Redirigir al dashboard después de 2 segundos
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 2000);
+        });
+
+        function showFieldError(field, message) {
+            field.classList.add('border-red-500');
+            const errorElement = field.nextElementSibling;
+            if (errorElement && errorElement.classList.contains('error-message')) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function showGeneralError(message) {
+            const errorDiv = document.getElementById('generalError');
+            const errorMessage = document.getElementById('generalErrorMessage');
+
+            errorMessage.textContent = message;
+            errorDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        function clearErrors() {
+            // Limpiar errores de campos
+            document.querySelectorAll('.border-red-500').forEach(campo => {
+                campo.classList.remove('border-red-500');
+            });
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.classList.add('hidden');
+            });
+
+            // Limpiar error general
+            document.getElementById('generalError').classList.add('hidden');
+        }
+
+        // Limpiar errores al escribir
+        document.querySelectorAll('input, select, textarea').forEach(campo => {
+            campo.addEventListener('input', function() {
+                this.classList.remove('border-red-500');
+                const errorElement = this.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('error-message')) {
+                    errorElement.classList.add('hidden');
+                }
+                document.getElementById('generalError').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
