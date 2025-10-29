@@ -19,7 +19,7 @@ export default function Logo() {
           ></path>
         </svg>
       </div>
-      <h1 className="text-2xl font-bold text-gray-800">
+      <h1 className="text-2xl font-bold text-gray-600">
         Sistema de Gestión Social
       </h1>
       <p className="text-gray-600 text-sm mt-2">
