@@ -32,10 +32,11 @@ export class FichaSocialService {
         params.append('limit', filtros.limit.toString())
       }
 
-      const response = await apiClient.get<FichaSocial[]>(`/fichas-sociales?${params.toString()}`)
+      const response = await apiClient.get<FichaSocial[]>(`/api/v1/fichas-sociales?${params.toString()}`)
 
       if (response.success && response.data) {
-        return response.data
+        // El backend devuelve {fichas: [], pagination: {}}
+        return Array.isArray(response.data) ? response.data : response.data.fichas || []
       }
 
       return []
@@ -47,7 +48,7 @@ export class FichaSocialService {
   // Obtener una ficha por ID
   static async getFichaById(id: string): Promise<FichaSocial> {
     try {
-      const response = await apiClient.get<FichaSocial>(`/fichas-sociales/${id}`)
+      const response = await apiClient.get<FichaSocial>(`/api/v1/fichas-sociales/${id}`)
 
       if (response.success && response.data) {
         return response.data
@@ -129,11 +130,15 @@ export class FichaSocialService {
     // Determinar estado según porcentaje
     const estado = porcentaje === 100 ? 'completa' : 'incompleta'
 
-    const response = await apiClient.post<FichaSocial>('/fichas-sociales', {
+    // Normalizar estado_civil a mayúsculas para compatibilidad con backend
+    const estadoCivilNormalizado = fichaData.estado_civil?.toUpperCase()
+
+    const response = await apiClient.post<FichaSocial>('/api/v1/fichas-sociales', {
       ...fichaData,
       apellidos,
       porcentaje_completado: porcentaje,
       estado,
+      estado_civil: estadoCivilNormalizado, // Usar el valor normalizado
       created_by: usuarioId,
       updated_by: usuarioId,
     })
@@ -160,11 +165,15 @@ export class FichaSocialService {
     // Determinar estado según porcentaje
     const estado = porcentaje === 100 ? 'completa' : 'incompleta'
 
-    const response = await apiClient.put<FichaSocial>(`/fichas-sociales/${id}`, {
+    // Normalizar estado_civil a mayúsculas para compatibilidad con backend
+    const estadoCivilNormalizado = fichaData.estado_civil?.toUpperCase()
+
+    const response = await apiClient.put<FichaSocial>(`/api/v1/fichas-sociales/${id}`, {
       ...fichaData,
       apellidos,
       porcentaje_completado: porcentaje,
       estado,
+      estado_civil: estadoCivilNormalizado, // Usar el valor normalizado
       updated_by: usuarioId,
     })
 
@@ -178,7 +187,7 @@ export class FichaSocialService {
   // Eliminar ficha
   static async deleteFicha(id: string): Promise<void> {
     try {
-      await apiClient.delete(`/fichas-sociales/${id}`)
+      await apiClient.delete(`/api/v1/fichas-sociales/${id}`)
     } catch (error) {
       throw error
     }

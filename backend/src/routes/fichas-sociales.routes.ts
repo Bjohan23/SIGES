@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { FichaSocialController } from '@/controllers/FichaSocialController';
 import { validateRequest } from '@/middleware/validation';
+import { handleImageUpload, processImagePaths, rollbackImages } from '@/middleware/imageHandler';
 
 const router = Router();
 const fichaSocialController = new FichaSocialController();
@@ -30,6 +31,9 @@ router.get('/:id',
 
 // Create new ficha social
 router.post('/',
+  handleImageUpload,
+  processImagePaths,
+  rollbackImages([]),
   [
     body('nombres').notEmpty().withMessage('Nombres are required'),
     body('apellidos').notEmpty().withMessage('Apellidos are required'),
@@ -40,7 +44,7 @@ router.post('/',
     body('sexo').optional().isIn(['M', 'F']).withMessage('Sex must be M or F'),
     body('nacionalidad').optional().isString().withMessage('Nacionalidad must be a string'),
     body('nivel_educativo').optional().isString().withMessage('Nivel educativo must be a string'),
-    body('estado_civil').optional().isIn(['SOLTERO', 'CASADO', 'DIVORCIADO', 'VIUDO', 'CONVIVIENTE']).withMessage('Invalid estado civil'),
+    body('estado_civil').optional().isString().withMessage('Estado civil must be a string'),
     body('num_hijos').optional().isInt({ min: 0 }).withMessage('Number of children must be a non-negative integer'),
   ],
   validateRequest,
@@ -49,6 +53,9 @@ router.post('/',
 
 // Update ficha social
 router.put('/:id',
+  handleImageUpload,
+  processImagePaths,
+  rollbackImages([]),
   [
     param('id').isUUID().withMessage('Invalid ficha ID format'),
     body('nombres').optional().notEmpty().withMessage('Nombres cannot be empty'),

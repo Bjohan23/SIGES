@@ -1,10 +1,12 @@
 import { Router } from 'express';
+import path from 'path';
 import authRoutes from './auth.routes';
 import usersRoutes from './users.routes';
 import dashboardRoutes from './dashboard.routes';
 import fichasSocialesRoutes from './fichas-sociales.routes';
 import { generalRateLimit } from '@/middleware/rateLimit';
 import { authenticateToken } from '@/middleware/auth';
+import { serveImage } from '@/middleware/imageHandler';
 
 const router = Router();
 
@@ -52,6 +54,9 @@ router.use('/api/v1/fichas-sociales', fichasSocialesRoutes);
 // router.use('/api/v1/entrevistas', entrevistasRoutes);
 // router.use('/api/v1/usuarios', usuariosRoutes);
 // router.use('/api/v1/roles', rolesRoutes);
+
+// Static images route (no authentication required for images)
+router.get('/images/fichas-sociales/:filename', serveImage);
 
 // API documentation route (if enabled)
 if (process.env.SWAGGER_ENABLED === 'true') {

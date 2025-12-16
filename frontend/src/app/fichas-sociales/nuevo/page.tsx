@@ -109,7 +109,7 @@ function FormContent() {
         grado: formData.grado,
         seccion: formData.seccion,
         nivel_educativo: formData.nivel_educativo || undefined,
-        estado_civil: formData.estado_civil as any,
+        estado_civil: formData.estado_civil?.toUpperCase() as any,
         num_hijos: formData.num_hijos,
         domicilio_actual: formData.domicilio_actual,
         distrito: formData.distrito,
