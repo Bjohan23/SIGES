@@ -5,20 +5,23 @@ import { BaseController } from './BaseController';
 const prisma = new PrismaClient();
 
 export class UserController extends BaseController {
+  constructor() {
+    super();
+  }
+
   /**
    * Get current user profile (authenticated user)
    */
-  static async getCurrentUserProfile(req: Request, res: Response) {
+  getCurrentUserProfile = async (req: Request, res: Response) => {
     try {
       if (!req.user) {
         return this.sendError(res, 401, 'User not authenticated');
       }
 
       const authUserId = req.user.id;
-      const userProfile = await prisma.usuario.findFirst({
+      const userProfile = await prisma.usuario.findUnique({
         where: {
-          auth_user_id: authUserId,
-          activo: true
+          id: authUserId
         },
         include: {
           rol: {
@@ -45,7 +48,7 @@ export class UserController extends BaseController {
   /**
    * Get user profile by auth user ID
    */
-  static async getUserProfile(req: Request, res: Response) {
+  getUserProfile = async (req: Request, res: Response) => {
     try {
       const { authUserId } = req.params;
 
@@ -79,7 +82,7 @@ export class UserController extends BaseController {
   /**
    * Get user profile by user ID
    */
-  static async getUserProfileById(req: Request, res: Response) {
+  getUserProfileById = async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
 
@@ -113,7 +116,7 @@ export class UserController extends BaseController {
   /**
    * Get user ID by auth user ID
    */
-  static async getUserIdByAuthId(req: Request, res: Response) {
+  getUserIdByAuthId = async (req: Request, res: Response) => {
     try {
       const { authUserId } = req.params;
 

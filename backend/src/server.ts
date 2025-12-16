@@ -29,38 +29,23 @@ class Server {
   }
 
   private initializeMiddlewares(): void {
-    // CORS configuration - MUST come before other security middleware
+    // CORS configuration - PERMITIR TODOS LOS ORÍGENES SIN RESTRICCIONES
     this.app.use(cors({
-      origin: (origin, callback) => {
-        const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      },
-      credentials: true,
+      origin: '*', // Permitir todos los orígenes
+      credentials: false, // Deshabilitar credenciales para evitar errores
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-      exposedHeaders: ['X-Total-Count', 'X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
-      preflightContinue: false,
-      optionsSuccessStatus: 200
+      allowedHeaders: '*', // Permitir todos los headers
+      optionsSuccessStatus: 200,
+      preflightContinue: false
     }));
 
-    // Handle preflight requests explicitly
+    // Handle preflight requests - PERMITIR TODO
     this.app.options('*', (req, res) => {
-      const origin = req.headers.origin;
-      const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin || '*');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-        res.header('Access-Control-Allow-Credentials', 'true');
-        res.header('Access-Control-Max-Age', '86400');
-        return res.status(200).send();
-      }
-      return res.status(403).send('Forbidden');
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.header('Access-Control-Allow-Headers', '*');
+      res.header('Access-Control-Max-Age', '86400');
+      return res.status(200).send();
     });
 
     // Security middleware (after CORS)
@@ -96,16 +81,11 @@ class Server {
     // Security checks
     this.app.use(detectSuspiciousRequests);
 
-    // Ensure CORS headers are always included
+    // Ensure CORS headers are always included - PERMITIR TODO
     this.app.use((req: Request, res: Response, next: NextFunction) => {
-      const origin = req.headers.origin;
-      const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin || '*');
-        res.header('Access-Control-Allow-Credentials', 'true');
-      }
-
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.header('Access-Control-Allow-Headers', '*');
       next();
     });
 

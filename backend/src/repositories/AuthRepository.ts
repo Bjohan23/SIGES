@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { BaseRepository } from './BaseRepository';
 import { Usuario, Rol, Modulo } from '@prisma/client';
 import { prisma } from '@/config/database';
+import { logger } from '@/utils/logger';
+import { DatabaseError } from '@/utils/errors';
 
 export interface UserWithRole extends Usuario {
   rol: Rol & {
@@ -202,5 +204,17 @@ export class AuthRepository extends BaseRepository<Usuario> {
     // This would count failed login attempts since the given date
     // For now, return 0 as placeholder
     return 0;
+  }
+
+  async updateLastLogin(id: string): Promise<void> {
+    try {
+      await this.getModel().update({
+        where: { id },
+        data: { ultimo_login: new Date() },
+      });
+    } catch (error) {
+      logger.error('Failed to update last login:', error);
+      throw new DatabaseError('Failed to update last login');
+    }
   }
 }

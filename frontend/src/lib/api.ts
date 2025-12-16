@@ -41,8 +41,8 @@ class ApiClient {
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
       },
-      // Habilitar credenciales para CORS
-      withCredentials: true,
+      // Deshabilitar credenciales para evitar errores de CORS
+      withCredentials: false,
       // Validación de status más permisiva para manejar mejor errores
       validateStatus: (status) => status < 500, // No considerar 4xx como errores de red
     });

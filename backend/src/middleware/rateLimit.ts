@@ -110,17 +110,23 @@ export function createRateLimit(options: RateLimitOptions) {
 }
 
 // Predefined rate limits
-export const authRateLimit = createRateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 5, // 5 attempts per 15 minutes
-});
+export const authRateLimit = process.env.DISABLE_RATE_LIMITING === 'true'
+  ? (req: Request, res: Response, next: NextFunction) => next() // Disable rate limiting in development
+  : createRateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxRequests: 5, // 5 attempts per 15 minutes
+    });
 
-export const generalRateLimit = createRateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100, // 100 requests per 15 minutes
-});
+export const generalRateLimit = process.env.DISABLE_RATE_LIMITING === 'true'
+  ? (req: Request, res: Response, next: NextFunction) => next() // Disable rate limiting in development
+  : createRateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxRequests: 100, // 100 requests per 15 minutes
+    });
 
-export const apiRateLimit = createRateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  maxRequests: 20, // 20 requests per minute
-});
+export const apiRateLimit = process.env.DISABLE_RATE_LIMITING === 'true'
+  ? (req: Request, res: Response, next: NextFunction) => next() // Disable rate limiting in development
+  : createRateLimit({
+      windowMs: 1 * 60 * 1000, // 1 minute
+      maxRequests: 20, // 20 requests per minute
+    });

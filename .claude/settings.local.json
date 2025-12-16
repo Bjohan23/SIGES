@@ -10,7 +10,14 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(tasklist:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(cmd:*)",
+      "Bash(powershell \"Stop-Process -Id 44304 -Force\")",
+      "Bash(npx prisma db seed:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(powershell \"Stop-Process -Id 38280 -Force\")",
+      "Bash(powershell \"Stop-Process -Id 18948 -Force\")"
     ],
     "deny": [],
     "ask": []
