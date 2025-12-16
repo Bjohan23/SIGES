@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { AuthService } from '@/services/AuthService'
 import { UserService } from '@/services/UserService'
 import { ErrorHandler } from '@/utils/errorHandler'
+import apiClient from '@/lib/api'
 import type { AuthContextType, Usuario } from '@/types'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -15,16 +16,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
-  // Cargar usuario al iniciar
+  // Evitar problemas de hidratación
   useEffect(() => {
-    checkUser()
+    setMounted(true)
   }, [])
+
+  // Cargar usuario al iniciar solo cuando está montado en el cliente
+  useEffect(() => {
+    if (mounted) {
+      checkUser()
+    }
+  }, [mounted])
 
   // Verificar si hay usuario autenticado
   async function checkUser() {
+    if (!mounted) return
+
     try {
+      // Primero verificar si hay token
+      const token = apiClient.getToken()
+
+      if (!token) {
+        setUser(null)
+        setLoading(false)
+        return
+      }
+
       // Obtener usuario actual usando el nuevo servicio
       const userProfile = await UserService.getCurrentUserProfile()
       if (userProfile) {

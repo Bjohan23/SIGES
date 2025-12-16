@@ -35,16 +35,16 @@ class ApiClient {
     // Configuración optimizada de Axios
     this.axiosInstance = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 30000, // 30 segundos timeout
+      timeout: 10000, // 10 segundos timeout (reducido)
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
       },
-      // Seguridad: Evitar envío automático de cookies
-      withCredentials: false,
-      // Validación de status
-      validateStatus: (status) => status >= 200 && status < 300,
+      // Habilitar credenciales para CORS
+      withCredentials: true,
+      // Validación de status más permisiva para manejar mejor errores
+      validateStatus: (status) => status < 500, // No considerar 4xx como errores de red
     });
 
     this.setupInterceptors();
@@ -99,12 +99,17 @@ class ApiClient {
       async (error: AxiosError) => {
         const originalRequest = error.config;
 
-        // Log de errores
+        // Log de errores (más detallado para debugging)
         console.error('❌ API Error:', {
           url: originalRequest?.url,
+          method: originalRequest?.method,
           status: error.response?.status,
+          statusText: error.response?.statusText,
           message: error.message,
           code: error.code,
+          isNetworkError: !error.response,
+          isTimeout: error.code === 'ECONNABORTED',
+          isCorsError: error.message.includes('CORS'),
         });
 
         // Manejo de token expirado
@@ -188,22 +193,25 @@ class ApiClient {
   private shouldRetry(error: AxiosError): boolean {
     // Solo retry en errores de red o 5xx
     if (!error.config) return false;
-    if (error.config._retryCount >= 3) return false;
+    if (error.config._retryCount >= 2) return false; // Reducido de 3 a 2 retries
 
     return (
       !error.response || // Error de red
-      (error.response.status >= 500 && error.response.status < 600) || // Server error
-      error.response.status === 429 // Rate limit
+      error.code === 'ECONNABORTED' || // Timeout
+      error.code === 'ENOTFOUND' || // DNS error
+      error.code === 'ECONNRESET' || // Connection reset
+      (error.response && error.response.status >= 500 && error.response.status < 600) || // Server error
+      (error.response && error.response.status === 429) // Rate limit
     );
   }
 
   private getRetryDelay(error: AxiosError): number {
-    // Retraso exponencial con jitter
-    const baseDelay = 1000;
-    const maxDelay = 10000;
+    // Retraso exponencial reducido para mejor UX
+    const baseDelay = 500;
+    const maxDelay = 5000;
     const retryCount = (error.config?._retryCount || 0) + 1;
     const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
-    const jitter = Math.random() * 1000;
+    const jitter = Math.random() * 500;
 
     return delay + jitter;
   }

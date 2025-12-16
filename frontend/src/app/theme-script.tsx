@@ -4,31 +4,31 @@
 export function ThemeScript() {
   const themeScript = `
     (function() {
-      function getAutoTheme() {
+      function getInitialTheme() {
         const hour = new Date().getHours();
         return hour >= 6 && hour < 18 ? 'light' : 'dark';
       }
 
       function applyTheme(theme) {
+        const root = document.documentElement;
         if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
+          root.classList.add('dark');
         } else {
-          document.documentElement.classList.remove('dark');
+          root.classList.remove('dark');
         }
       }
 
+      // Prevenir FOUC (Flash of Unstyled Content)
+      // Aplicar tema inmediatamente antes de que el body se renderice
       try {
-        const savedTheme = localStorage.getItem('theme');
-        const savedIsAuto = localStorage.getItem('themeAuto');
+        const theme = getInitialTheme();
+        applyTheme(theme);
 
-        if (savedIsAuto === 'false' && savedTheme) {
-          applyTheme(savedTheme);
-        } else {
-          applyTheme(getAutoTheme());
-        }
+        // Guardar en localStorage para referencia futura
+        localStorage.setItem('initial-theme', theme);
       } catch (e) {
-        // Si hay error, aplicar tema por defecto según hora
-        applyTheme(getAutoTheme());
+        // Si hay error con localStorage, solo aplicar el tema
+        applyTheme(getInitialTheme());
       }
     })();
   `;
