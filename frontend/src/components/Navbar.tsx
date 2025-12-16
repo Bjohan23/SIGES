@@ -3,7 +3,7 @@
 // components/Navbar.tsx
 // Single Responsibility: Barra de navegación con tema claro/oscuro
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
@@ -12,9 +12,30 @@ import { useTheme } from '@/context/ThemeContext'
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showThemeMenu, setShowThemeMenu] = useState(false)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
   const pathname = usePathname()
   const { logout, user } = useAuth()
   const { theme, toggleTheme, isAuto, setIsAuto } = useTheme()
+
+  const themeMenuRef = useRef<HTMLDivElement>(null)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(event.target as Node)) {
+        setShowThemeMenu(false)
+      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -81,7 +102,7 @@ export default function Navbar() {
             ))}
 
             {/* Selector de tema */}
-            <div className="relative">
+            <div className="relative" ref={themeMenuRef}>
               <button
                 type="button"
                 onClick={() => setShowThemeMenu(!showThemeMenu)}
@@ -161,17 +182,53 @@ export default function Navbar() {
             </div>
 
             {user && (
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {user.nombre_completo}
-              </span>
+              <div className="flex items-center space-x-3">
+                <Link
+                  href="/perfil"
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                >
+                  {user.nombre_completo}
+                </Link>
+                <div className="relative" ref={profileMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    className="p-1 rounded-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
+                    title="Mi Perfil"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </button>
+
+                  {/* Menú desplegable de perfil */}
+                  {showProfileMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
+                      <Link
+                        href="/perfil"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Mi Perfil
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Cerrar Sesión
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-            >
-              Cerrar Sesión
-            </button>
           </div>
 
           {/* Botón hamburguesa móvil */}

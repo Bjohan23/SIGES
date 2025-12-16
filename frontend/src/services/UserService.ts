@@ -49,4 +49,24 @@ export class UserService {
       return null
     }
   }
+
+  // Actualizar perfil del usuario actual
+  static async updateCurrentUserProfile(profileData: {
+    nombres: string
+    apellidos: string
+    dni: string
+    telefono: string
+  }): Promise<Usuario> {
+    try {
+      const response = await apiClient.put<Usuario>('/users/me/profile', profileData)
+
+      if (response.success && response.data) {
+        return response.data
+      }
+
+      throw new Error('No se pudo actualizar el perfil')
+    } catch (error) {
+      throw error
+    }
+  }
 }

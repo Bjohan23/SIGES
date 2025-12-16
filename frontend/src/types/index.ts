@@ -1,6 +1,27 @@
 // types/index.ts
 // Tipos de datos de la aplicación
 
+export interface User {
+  id: string
+  email: string
+  password: string
+  nombres: string
+  apellidos: string
+  dni: string
+  telefono: string
+  activo: boolean
+  email_verificado: boolean
+  ultimo_login: string
+  created_at: string
+  updated_at: string
+  rol_id: string
+  rol?: {
+    id: string
+    nombre: string
+    descripcion: string
+  }
+}
+
 export interface Usuario {
   id: string
   auth_user_id: string
