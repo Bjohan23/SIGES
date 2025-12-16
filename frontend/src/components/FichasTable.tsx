@@ -3,10 +3,27 @@
 
 import Link from 'next/link'
 import type { FichaSocial } from '@/types'
+import { fichaSocialAlerts } from '@/components/FichaSocialAlert'
 
 interface FichasTableProps {
   fichas: FichaSocial[]
   onDelete: (id: string) => void
+}
+
+const handleDeleteConfirm = (ficha: FichaSocial, onDelete: (id: string) => void) => {
+  // Show warning alert with ficha details
+  fichaSocialAlerts.warning(
+    ficha,
+    "¿Confirmar eliminación?",
+    `¿Está seguro de eliminar esta ficha social? Esta acción no se puede deshacer.`
+  );
+
+  // Still use native confirm for actual confirmation (could be improved with a modal)
+  setTimeout(() => {
+    if (confirm(`¿Estás seguro de eliminar la ficha de ${ficha.nombres} ${ficha.apellidos}?`)) {
+      onDelete(ficha.id);
+    }
+  }, 1000);
 }
 
 export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
@@ -126,15 +143,7 @@ export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (
-                          confirm(
-                            '¿Estás seguro de eliminar esta ficha social?'
-                          )
-                        ) {
-                          onDelete(ficha.id)
-                        }
-                      }}
+                      onClick={() => handleDeleteConfirm(ficha, onDelete)}
                       className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                       title="Eliminar"
                     >

@@ -4,6 +4,7 @@ import './globals.css'
 import { AuthProvider } from '@/context/AuthContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { ThemeScript } from './theme-script'
+import FichaSocialToaster from '@/components/FichaSocialAlert'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,10 @@ export default function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+            <FichaSocialToaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

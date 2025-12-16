@@ -11,6 +11,7 @@ import { FichaSocialService } from "@/services/FichaSocialService";
 import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
 import ErrorAlert from "@/components/ErrorAlert";
+import { fichaSocialAlerts } from "@/components/FichaSocialAlert";
 
 // Importar componentes de pestañas
 import DatosEstudianteTab from "@/components/ficha-social-form/DatosEstudianteTab";
@@ -120,9 +121,15 @@ function FormContent() {
         declaracion_jurada: formData.declaracion_jurada,
       };
 
-      await FichaSocialService.createFicha(fichaData, user.id);
+      const newFicha = await FichaSocialService.createFicha(fichaData, user.id);
 
-      alert("Ficha social creada exitosamente");
+      // Show success alert with ficha details
+      fichaSocialAlerts.success(
+        newFicha,
+        "Ficha social creada exitosamente",
+        "La ficha social ha sido registrada correctamente en el sistema"
+      );
+
       resetForm();
       router.push("/fichas-sociales");
     } catch (err: any) {
@@ -252,12 +259,36 @@ function FormContent() {
                 type="button"
                 variant="secondary"
                 onClick={() => {
-                  if (
-                    confirm("¿Está seguro de cancelar? Se perderán todos los datos ingresados.")
-                  ) {
-                    resetForm();
-                    router.push("/fichas-sociales");
-                  }
+                  // Create a simple confirmation dialog using custom alert
+                  const confirmData = {
+                    id: 'confirm',
+                    nombres: '',
+                    apellidos: '',
+                    dni: '',
+                    distrito: '',
+                    estado: 'INCOMPLETA' as const,
+                    porcentaje_completado: progress,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    creador: null as any,
+                    actualizador: null as any,
+                    _count: { entrevistas: 0 }
+                  };
+
+                  fichaSocialAlerts.warning(
+                    confirmData,
+                    "¿Cancelar formulario?",
+                    `¿Está seguro de cancelar? Se perderán todos los datos ingresados (${progress}% completado).`
+                  );
+
+                  // Note: For actual confirmation, we'd need to implement a proper confirm dialog
+                  // This is a temporary solution to show the warning
+                  setTimeout(() => {
+                    if (confirm("¿Está seguro de cancelar? Se perderán todos los datos ingresados.")) {
+                      resetForm();
+                      router.push("/fichas-sociales");
+                    }
+                  }, 1000);
                 }}
               >
                 Cancelar
