@@ -67,19 +67,19 @@ export default function FichaSocialDetailPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
       </div>
     )
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navbar />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
           </div>
         </main>
       </div>
@@ -88,7 +88,7 @@ export default function FichaSocialDetailPage() {
 
   if (error || !ficha) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navbar />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorAlert message={error || 'Ficha no encontrada'} />
@@ -110,18 +110,18 @@ export default function FichaSocialDetailPage() {
   } : { ingresos: 0, egresos: 0 }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               Ficha Social
             </h1>
-            <p className="text-gray-600 mt-1">
-              {ficha.apellido_paterno || ficha.apellidos} {ficha.apellido_materno}, {ficha.nombres}
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              {ficha.apellidos || `${ficha.apellido_paterno || ''} ${ficha.apellido_materno || ''}`.trim()}, {ficha.nombres}
             </p>
           </div>
           <div className="flex space-x-3">
@@ -147,35 +147,35 @@ export default function FichaSocialDetailPage() {
         </div>
 
         {/* Estado y Progreso */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-6 mb-6 border border-transparent dark:border-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Estado</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Estado</p>
               <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                ficha.estado === 'completa' ? 'bg-green-100 text-green-800' :
-                ficha.estado === 'incompleta' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
+                ficha.estado === 'COMPLETA' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
+                ficha.estado === 'INCOMPLETA' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' :
+                'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
               }`}>
                 {ficha.estado}
               </span>
             </div>
             <div>
-              <p className="text-sm text-gray-500 mb-1">Progreso</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Progreso</p>
               <div className="flex items-center">
-                <div className="flex-1 bg-gray-200 rounded-full h-3 mr-3">
+                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3 mr-3">
                   <div
-                    className="bg-blue-600 h-3 rounded-full"
+                    className="bg-blue-600 dark:bg-blue-500 h-3 rounded-full"
                     style={{ width: `${ficha.porcentaje_completado}%` }}
                   />
                 </div>
-                <span className="text-sm font-semibold text-blue-600">
+                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                   {ficha.porcentaje_completado}%
                 </span>
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-500 mb-1">Fecha de Creación</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Fecha de Creación</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {formatDate(ficha.created_at)}
               </p>
             </div>
@@ -183,13 +183,12 @@ export default function FichaSocialDetailPage() {
         </div>
 
         {/* Sección 1: Datos del Estudiante */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-6 mb-6 border border-transparent dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
             Datos del Estudiante
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InfoField label="Apellido Paterno" value={ficha.apellido_paterno || 'N/A'} />
-            <InfoField label="Apellido Materno" value={ficha.apellido_materno || 'N/A'} />
+            <InfoField label="Apellidos" value={ficha.apellidos || 'N/A'} />
             <InfoField label="Nombres" value={ficha.nombres} />
             <InfoField label="Sexo" value={ficha.sexo === 'M' ? 'Masculino' : 'Femenino'} />
             <InfoField label="Fecha de Nacimiento" value={formatDate(ficha.fecha_nacimiento)} />
@@ -208,13 +207,13 @@ export default function FichaSocialDetailPage() {
 
         {/* Sección 2: Composición Familiar */}
         {ficha.composicion_familiar && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-6 mb-6 border border-transparent dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
               Composición Familiar
             </h2>
 
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-blue-900 mb-3 bg-blue-50 p-2 rounded">
+              <h3 className="text-lg font-medium text-blue-900 dark:text-blue-100 mb-3 bg-blue-50 dark:bg-blue-900/30 p-2 rounded">
                 Datos del Padre
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -229,7 +228,7 @@ export default function FichaSocialDetailPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-medium text-pink-900 mb-3 bg-pink-50 p-2 rounded">
+              <h3 className="text-lg font-medium text-pink-900 dark:text-pink-100 mb-3 bg-pink-50 dark:bg-pink-900/30 p-2 rounded">
                 Datos de la Madre
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -247,13 +246,13 @@ export default function FichaSocialDetailPage() {
 
         {/* Sección 3: Situación Económica */}
         {ficha.datos_economicos && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-6 mb-6 border border-transparent dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
               Situación Económica
             </h2>
 
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-green-900 mb-3 bg-green-50 p-2 rounded">
+              <h3 className="text-lg font-medium text-green-900 dark:text-green-100 mb-3 bg-green-50 dark:bg-green-900/30 p-2 rounded">
                 Ingresos Mensuales
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -261,19 +260,19 @@ export default function FichaSocialDetailPage() {
                 <InfoField label="Ingreso del Cónyuge" value={formatCurrency(ficha.datos_economicos.ingresos.conyuge)} />
                 <InfoField label="Otros Ingresos" value={formatCurrency(ficha.datos_economicos.ingresos.otros)} />
               </div>
-              <div className="mt-3 p-3 bg-green-100 rounded">
-                <p className="font-semibold text-green-900">
+              <div className="mt-3 p-3 bg-green-100 dark:bg-green-900/30 rounded">
+                <p className="font-semibold text-green-900 dark:text-green-100">
                   Total Ingresos: {formatCurrency(totales.ingresos)}
                 </p>
               </div>
             </div>
 
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-red-900 mb-3 bg-red-50 p-2 rounded">
+              <h3 className="text-lg font-medium text-red-900 dark:text-red-100 mb-3 bg-red-50 dark:bg-red-900/30 p-2 rounded">
                 Egresos Mensuales
               </h3>
 
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Servicios Básicos</h4>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Servicios Básicos</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                 <InfoField label="Agua" value={formatCurrency(ficha.datos_economicos.egresos.servicios_basicos.agua)} />
                 <InfoField label="Luz" value={formatCurrency(ficha.datos_economicos.egresos.servicios_basicos.luz)} />
@@ -282,7 +281,7 @@ export default function FichaSocialDetailPage() {
                 <InfoField label="Cable" value={formatCurrency(ficha.datos_economicos.egresos.servicios_basicos.cable)} />
               </div>
 
-              <h4 className="text-sm font-medium text-gray-700 mb-2 mt-4">Gastos Familiares</h4>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-4">Gastos Familiares</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
                 <InfoField label="Alimentación" value={formatCurrency(ficha.datos_economicos.egresos.gastos_familiares.alimentacion)} />
                 <InfoField label="Educación" value={formatCurrency(ficha.datos_economicos.egresos.gastos_familiares.educacion)} />
@@ -291,32 +290,32 @@ export default function FichaSocialDetailPage() {
                 <InfoField label="Vestimenta" value={formatCurrency(ficha.datos_economicos.egresos.gastos_familiares.vestimenta)} />
               </div>
 
-              <h4 className="text-sm font-medium text-gray-700 mb-2 mt-4">Deudas y Seguros</h4>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-4">Deudas y Seguros</h4>
               <div className="grid grid-cols-2 gap-3">
                 <InfoField label="Préstamos" value={formatCurrency(ficha.datos_economicos.egresos.deudas_seguros.prestamos)} />
                 <InfoField label="Seguros" value={formatCurrency(ficha.datos_economicos.egresos.deudas_seguros.seguros)} />
               </div>
 
-              <div className="mt-3 p-3 bg-red-100 rounded">
-                <p className="font-semibold text-red-900">
+              <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 rounded">
+                <p className="font-semibold text-red-900 dark:text-red-100">
                   Total Egresos: {formatCurrency(totales.egresos)}
                 </p>
               </div>
             </div>
 
-            <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-sm text-gray-600">Total Ingresos</p>
-                  <p className="text-lg font-bold text-green-600">{formatCurrency(totales.ingresos)}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Total Ingresos</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">{formatCurrency(totales.ingresos)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Egresos</p>
-                  <p className="text-lg font-bold text-red-600">{formatCurrency(totales.egresos)}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Total Egresos</p>
+                  <p className="text-lg font-bold text-red-600 dark:text-red-400">{formatCurrency(totales.egresos)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Balance</p>
-                  <p className={`text-lg font-bold ${totales.ingresos - totales.egresos >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Balance</p>
+                  <p className={`text-lg font-bold ${totales.ingresos - totales.egresos >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
                     {formatCurrency(totales.ingresos - totales.egresos)}
                   </p>
                 </div>
@@ -329,18 +328,18 @@ export default function FichaSocialDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Vivienda */}
           {ficha.datos_vivienda && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-6 border border-transparent dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
                 Datos de Vivienda
               </h2>
               <InfoField label="Tipo de Vivienda" value={ficha.datos_vivienda.tipo_vivienda || 'N/A'} className="mb-3" />
 
               {ficha.datos_vivienda.material && ficha.datos_vivienda.material.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-gray-700 mb-1">Material de Construcción</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material de Construcción</p>
                   <div className="flex flex-wrap gap-2">
                     {ficha.datos_vivienda.material.map((item, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                      <span key={idx} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded">
                         {item}
                       </span>
                     ))}
@@ -350,10 +349,10 @@ export default function FichaSocialDetailPage() {
 
               {ficha.datos_vivienda.tenencia && ficha.datos_vivienda.tenencia.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-gray-700 mb-1">Tenencia</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tenencia</p>
                   <div className="flex flex-wrap gap-2">
                     {ficha.datos_vivienda.tenencia.map((item, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                      <span key={idx} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
                         {item}
                       </span>
                     ))}
@@ -363,10 +362,10 @@ export default function FichaSocialDetailPage() {
 
               {ficha.datos_vivienda.servicios && ficha.datos_vivienda.servicios.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-gray-700 mb-1">Servicios Básicos</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Servicios Básicos</p>
                   <div className="flex flex-wrap gap-2">
                     {ficha.datos_vivienda.servicios.map((item, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                      <span key={idx} className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
                         {item}
                       </span>
                     ))}
@@ -376,10 +375,10 @@ export default function FichaSocialDetailPage() {
 
               {ficha.datos_vivienda.problemas_sociales && ficha.datos_vivienda.problemas_sociales.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">Problemas Sociales</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Problemas Sociales</p>
                   <div className="flex flex-wrap gap-2">
                     {ficha.datos_vivienda.problemas_sociales.map((item, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">
+                      <span key={idx} className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded">
                         {item}
                       </span>
                     ))}
@@ -391,8 +390,8 @@ export default function FichaSocialDetailPage() {
 
           {/* Salud */}
           {ficha.datos_salud && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-6 border border-transparent dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
                 Datos de Salud
               </h2>
               <InfoField label="Tipo de Seguro" value={ficha.datos_salud.tipo_seguro || 'N/A'} className="mb-3" />
@@ -400,8 +399,8 @@ export default function FichaSocialDetailPage() {
 
               {ficha.datos_salud.alergias?.tiene && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-gray-700 mb-1">Alergias</p>
-                  <p className="text-sm text-gray-600 bg-yellow-50 p-2 rounded">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alergias</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/30 p-2 rounded">
                     {ficha.datos_salud.alergias.especificar || 'Sin especificar'}
                   </p>
                 </div>
@@ -409,8 +408,8 @@ export default function FichaSocialDetailPage() {
 
               {ficha.datos_salud.enfermedades?.tiene && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-gray-700 mb-1">Enfermedades Crónicas</p>
-                  <p className="text-sm text-gray-600 bg-red-50 p-2 rounded">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enfermedades Crónicas</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-900/30 p-2 rounded">
                     {ficha.datos_salud.enfermedades.especificar || 'Sin especificar'}
                   </p>
                 </div>
@@ -418,12 +417,12 @@ export default function FichaSocialDetailPage() {
 
               {ficha.datos_salud.discapacidad?.tiene && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">Discapacidad</p>
-                  <div className="bg-orange-50 p-2 rounded">
-                    <p className="text-sm text-gray-600">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discapacidad</p>
+                  <div className="bg-orange-50 dark:bg-orange-900/30 p-2 rounded">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       <strong>Tipo:</strong> {ficha.datos_salud.discapacidad.tipo || 'N/A'}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       <strong>Grado:</strong> {ficha.datos_salud.discapacidad.grado || 'N/A'}
                     </p>
                   </div>
@@ -435,8 +434,8 @@ export default function FichaSocialDetailPage() {
 
         {/* Sección 5: Declaración Jurada */}
         {ficha.declaracion_jurada && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-6 border border-transparent dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
               Declaración Jurada
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -456,8 +455,8 @@ export default function FichaSocialDetailPage() {
               </div>
               {ficha.declaracion_jurada.firma_digital && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">Firma Digital</p>
-                  <div className="border-2 border-gray-200 rounded p-2 bg-gray-50">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Firma Digital</p>
+                  <div className="border-2 border-gray-200 dark:border-gray-600 rounded p-2 bg-gray-50 dark:bg-gray-700">
                     <img
                       src={ficha.declaracion_jurada.firma_digital}
                       alt="Firma Digital"
@@ -486,8 +485,8 @@ function InfoField({
 }) {
   return (
     <div className={className}>
-      <p className="text-sm font-medium text-gray-500">{label}</p>
-      <p className="text-sm text-gray-900 mt-1">{value}</p>
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+      <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">{value}</p>
     </div>
   )
 }
