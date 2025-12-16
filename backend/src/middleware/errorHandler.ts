@@ -8,6 +8,15 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ): void {
+  // Ensure CORS headers are always included, even for errors
+  const origin = req.headers.origin;
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
+
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
   logger.error('Error occurred:', {
     message: error.message,
     stack: error.stack,
@@ -25,6 +34,7 @@ export function errorHandler(
         statusCode: error.statusCode,
         isOperational: error.isOperational,
       },
+      timestamp: new Date().toISOString(),
     });
     return;
   }
@@ -74,6 +84,7 @@ export function errorHandler(
         code: prismaError.code,
         isOperational: false,
       },
+      timestamp: new Date().toISOString(),
     });
     return;
   }
@@ -87,6 +98,7 @@ export function errorHandler(
         statusCode: 400,
         isOperational: false,
       },
+      timestamp: new Date().toISOString(),
     });
     return;
   }
@@ -100,6 +112,7 @@ export function errorHandler(
         statusCode: 401,
         isOperational: false,
       },
+      timestamp: new Date().toISOString(),
     });
     return;
   }
@@ -112,6 +125,7 @@ export function errorHandler(
         statusCode: 401,
         isOperational: false,
       },
+      timestamp: new Date().toISOString(),
     });
     return;
   }
@@ -126,10 +140,20 @@ export function errorHandler(
       statusCode: 500,
       isOperational: false,
     },
+    timestamp: new Date().toISOString(),
   });
 }
 
 export function notFoundHandler(req: Request, res: Response): void {
+  // Ensure CORS headers are included in 404 responses
+  const origin = req.headers.origin;
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
+
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
   logger.warn(`Route not found: ${req.method} ${req.url}`);
 
   res.status(404).json({
@@ -139,5 +163,6 @@ export function notFoundHandler(req: Request, res: Response): void {
       statusCode: 404,
       isOperational: true,
     },
+    timestamp: new Date().toISOString(),
   });
 }

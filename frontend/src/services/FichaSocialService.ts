@@ -1,7 +1,7 @@
 // services/FichaSocialService.ts
 // Single Responsibility: Operaciones CRUD de Fichas Sociales
 
-import { supabase } from '@/lib/supabase'
+import apiClient from '@/lib/api'
 import type { FichaSocial } from '@/types'
 
 export class FichaSocialService {
@@ -10,42 +10,53 @@ export class FichaSocialService {
     apellidos?: string
     estado?: string
     distrito?: string
+    page?: number
+    limit?: number
   }): Promise<FichaSocial[]> {
-    let query = supabase
-      .from('vista_resumen_fichas')
-      .select('*')
-      .order('created_at', { ascending: false })
+    try {
+      const params = new URLSearchParams()
 
-    if (filtros?.apellidos) {
-      query = query.ilike('apellidos', `%${filtros.apellidos}%`)
+      if (filtros?.apellidos) {
+        params.append('apellidos', filtros.apellidos)
+      }
+      if (filtros?.estado) {
+        params.append('estado', filtros.estado)
+      }
+      if (filtros?.distrito) {
+        params.append('distrito', filtros.distrito)
+      }
+      if (filtros?.page) {
+        params.append('page', filtros.page.toString())
+      }
+      if (filtros?.limit) {
+        params.append('limit', filtros.limit.toString())
+      }
+
+      const response = await apiClient.get<FichaSocial[]>(`/fichas-sociales?${params.toString()}`)
+
+      if (response.success && response.data) {
+        return response.data
+      }
+
+      return []
+    } catch (error) {
+      throw error
     }
-
-    if (filtros?.estado) {
-      query = query.eq('estado', filtros.estado)
-    }
-
-    if (filtros?.distrito) {
-      query = query.eq('distrito', filtros.distrito)
-    }
-
-    const { data, error } = await query
-
-    if (error) throw error
-    return (data || []) as FichaSocial[]
   }
 
   // Obtener una ficha por ID
   static async getFichaById(id: string): Promise<FichaSocial> {
-    const { data, error } = await supabase
-      .from('vista_fichas_con_edad')
-      .select('*')
-      .eq('id', id)
-      .single()
+    try {
+      const response = await apiClient.get<FichaSocial>(`/fichas-sociales/${id}`)
 
-    if (error) throw error
-    if (!data) throw new Error('Ficha no encontrada')
+      if (response.success && response.data) {
+        return response.data
+      }
 
-    return data as FichaSocial
+      throw new Error('Ficha no encontrada')
+    } catch (error) {
+      throw error
+    }
   }
 
   // Calcular porcentaje de completado
@@ -118,21 +129,20 @@ export class FichaSocialService {
     // Determinar estado según porcentaje
     const estado = porcentaje === 100 ? 'completa' : 'incompleta'
 
-    const { data, error } = await supabase
-      .from('fichas_sociales')
-      .insert({
-        ...fichaData,
-        apellidos,
-        porcentaje_completado: porcentaje,
-        estado,
-        created_by: usuarioId,
-        updated_by: usuarioId,
-      })
-      .select()
-      .single()
+    const response = await apiClient.post<FichaSocial>('/fichas-sociales', {
+      ...fichaData,
+      apellidos,
+      porcentaje_completado: porcentaje,
+      estado,
+      created_by: usuarioId,
+      updated_by: usuarioId,
+    })
 
-    if (error) throw error
-    return data as FichaSocial
+    if (response.success && response.data) {
+      return response.data
+    }
+
+    throw new Error('No se pudo crear la ficha')
   }
 
   // Actualizar ficha existente
@@ -150,30 +160,27 @@ export class FichaSocialService {
     // Determinar estado según porcentaje
     const estado = porcentaje === 100 ? 'completa' : 'incompleta'
 
-    const { data, error } = await supabase
-      .from('fichas_sociales')
-      .update({
-        ...fichaData,
-        apellidos,
-        porcentaje_completado: porcentaje,
-        estado,
-        updated_by: usuarioId,
-      })
-      .eq('id', id)
-      .select()
-      .single()
+    const response = await apiClient.put<FichaSocial>(`/fichas-sociales/${id}`, {
+      ...fichaData,
+      apellidos,
+      porcentaje_completado: porcentaje,
+      estado,
+      updated_by: usuarioId,
+    })
 
-    if (error) throw error
-    return data as FichaSocial
+    if (response.success && response.data) {
+      return response.data
+    }
+
+    throw new Error('No se pudo actualizar la ficha')
   }
 
   // Eliminar ficha
   static async deleteFicha(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('fichas_sociales')
-      .delete()
-      .eq('id', id)
-
-    if (error) throw error
+    try {
+      await apiClient.delete(`/fichas-sociales/${id}`)
+    } catch (error) {
+      throw error
+    }
   }
 }

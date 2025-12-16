@@ -76,9 +76,11 @@ model Usuario {
   rol_id            String
   rol               Rol       @relation(fields: [rol_id], references: [id])
 
-  fichas_sociales     FichaSocial[]
-  entrevistas_aplicadas EntrevistaAplicada[]
-  auditorias         Auditoria[]
+  fichas_sociales_creadas     FichaSocial[]      @relation("FichaCreador")
+  fichas_sociales_actualizadas FichaSocial[]    @relation("FichaActualizador")
+  entrevistas_creadas          EntrevistaAplicada[] @relation("EntrevistaCreador")
+  entrevistas_actualizadas     EntrevistaAplicada[] @relation("EntrevistaActualizador")
+  auditorias                  Auditoria[]
 
   @@map("usuarios")
 }
@@ -166,7 +168,6 @@ model FichaSocial {
   @@index([estado])
   @@index([distrito])
   @@index([created_at])
-  @@index(map: "idx_fichas_busqueda", type: Gin, fields: [search_vector])
   @@map("fichas_sociales")
 }
 
@@ -204,8 +205,3 @@ model EntrevistaAplicada {
   @@map("entrevistas_aplicadas")
 }
 
-// Functions for PostgreSQL triggers
-model PrismaTrigger {
-  // This is a placeholder for trigger functions
-  // The actual triggers are defined in SQL migration files
-}

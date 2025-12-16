@@ -1,7 +1,7 @@
 // services/EntrevistaService.ts
 // Single Responsibility: Operaciones CRUD de Entrevistas
 
-import { supabase } from '@/lib/supabase'
+import apiClient from '@/lib/api'
 import type { EntrevistaAplicada } from '@/types'
 
 export class EntrevistaService {
@@ -9,38 +9,50 @@ export class EntrevistaService {
   static async getEntrevistas(filtros?: {
     grado?: string
     estado?: string
+    page?: number
+    limit?: number
   }): Promise<EntrevistaAplicada[]> {
-    let query = supabase
-      .from('vista_entrevistas_completas')
-      .select('*')
-      .order('created_at', { ascending: false })
+    try {
+      const params = new URLSearchParams()
 
-    if (filtros?.grado) {
-      query = query.eq('grado', filtros.grado)
+      if (filtros?.grado) {
+        params.append('grado', filtros.grado)
+      }
+      if (filtros?.estado) {
+        params.append('estado', filtros.estado)
+      }
+      if (filtros?.page) {
+        params.append('page', filtros.page.toString())
+      }
+      if (filtros?.limit) {
+        params.append('limit', filtros.limit.toString())
+      }
+
+      const response = await apiClient.get<EntrevistaAplicada[]>(`/entrevistas?${params.toString()}`)
+
+      if (response.success && response.data) {
+        return response.data
+      }
+
+      return []
+    } catch (error) {
+      throw error
     }
-
-    if (filtros?.estado) {
-      query = query.eq('estado', filtros.estado)
-    }
-
-    const { data, error } = await query
-
-    if (error) throw error
-    return (data || []) as EntrevistaAplicada[]
   }
 
   // Obtener una entrevista por ID
   static async getEntrevistaById(id: string): Promise<EntrevistaAplicada> {
-    const { data, error } = await supabase
-      .from('entrevistas_aplicadas')
-      .select('*')
-      .eq('id', id)
-      .single()
+    try {
+      const response = await apiClient.get<EntrevistaAplicada>(`/entrevistas/${id}`)
 
-    if (error) throw error
-    if (!data) throw new Error('Entrevista no encontrada')
+      if (response.success && response.data) {
+        return response.data
+      }
 
-    return data as EntrevistaAplicada
+      throw new Error('Entrevista no encontrada')
+    } catch (error) {
+      throw error
+    }
   }
 
   // Crear nueva entrevista
@@ -48,18 +60,21 @@ export class EntrevistaService {
     entrevistaData: Partial<EntrevistaAplicada>,
     usuarioId: string
   ): Promise<EntrevistaAplicada> {
-    const { data, error } = await supabase
-      .from('entrevistas_aplicadas')
-      .insert({
+    try {
+      const response = await apiClient.post<EntrevistaAplicada>('/entrevistas', {
         ...entrevistaData,
         created_by: usuarioId,
         updated_by: usuarioId,
       })
-      .select()
-      .single()
 
-    if (error) throw error
-    return data as EntrevistaAplicada
+      if (response.success && response.data) {
+        return response.data
+      }
+
+      throw new Error('No se pudo crear la entrevista')
+    } catch (error) {
+      throw error
+    }
   }
 
   // Actualizar entrevista existente
@@ -68,27 +83,28 @@ export class EntrevistaService {
     entrevistaData: Partial<EntrevistaAplicada>,
     usuarioId: string
   ): Promise<EntrevistaAplicada> {
-    const { data, error } = await supabase
-      .from('entrevistas_aplicadas')
-      .update({
+    try {
+      const response = await apiClient.put<EntrevistaAplicada>(`/entrevistas/${id}`, {
         ...entrevistaData,
         updated_by: usuarioId,
       })
-      .eq('id', id)
-      .select()
-      .single()
 
-    if (error) throw error
-    return data as EntrevistaAplicada
+      if (response.success && response.data) {
+        return response.data
+      }
+
+      throw new Error('No se pudo actualizar la entrevista')
+    } catch (error) {
+      throw error
+    }
   }
 
   // Eliminar entrevista
   static async deleteEntrevista(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('entrevistas_aplicadas')
-      .delete()
-      .eq('id', id)
-
-    if (error) throw error
+    try {
+      await apiClient.delete(`/entrevistas/${id}`)
+    } catch (error) {
+      throw error
+    }
   }
 }

@@ -22,7 +22,7 @@ export function useDashboard() {
       const data = await DashboardService.getEstadisticas()
       setEstadisticas(data)
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       setError(errorMessage)
     } finally {
       setLoading(false)

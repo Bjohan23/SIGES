@@ -1,13 +1,13 @@
 // middleware.ts
-// Protección de rutas desactivada - La protección se maneja en el AuthContext
-// El middleware de Next.js 16 tiene problemas con Supabase cookies
+// Protección de rutas - La protección se maneja principalmente en el AuthContext
+// Este middleware puede ser usado para futuras implementaciones de protección de rutas
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   // Por ahora solo dejamos pasar todo
-  // La protección real está en AuthContext y en los componentes
+  // La protección real está en AuthContext y en los componentes de nivel superior
   return NextResponse.next()
 }
 

@@ -28,6 +28,29 @@ export abstract class BaseController implements IController {
     });
   }
 
+  // Alias methods for backward compatibility
+  protected sendSuccess(res: Response, statusCode: number, data: any, message?: string): void {
+    res.status(statusCode).json({
+      success: true,
+      data,
+      message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  protected sendError(res: Response, statusCode: number, message: string, details?: any): void {
+    res.status(statusCode).json({
+      success: false,
+      error: {
+        message,
+        statusCode,
+        isOperational: statusCode < 500,
+        details
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   protected paginated(res: Response, data: any, pagination: any, statusCode: number = 200): void {
     res.status(statusCode).json({
       success: true,
@@ -64,7 +87,7 @@ export abstract class BaseController implements IController {
     return user?.sub || user?.id || null;
   }
 
-  protected async asyncHandler(
+  protected asyncHandler(
     handler: (req: Request, res: Response, next: NextFunction) => Promise<void>
   ) {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {

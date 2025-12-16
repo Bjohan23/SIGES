@@ -25,7 +25,7 @@ export function useEntrevistas() {
       const data = await EntrevistaService.getEntrevistas(filtros)
       setEntrevistas(data)
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -44,7 +44,7 @@ export function useEntrevistas() {
       setEntrevistas([nuevaEntrevista, ...entrevistas])
       return nuevaEntrevista
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }
@@ -67,7 +67,7 @@ export function useEntrevistas() {
       )
       return entrevistaActualizada
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }
@@ -77,7 +77,7 @@ export function useEntrevistas() {
       await EntrevistaService.deleteEntrevista(id)
       setEntrevistas(entrevistas.filter((e) => e.id !== id))
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }

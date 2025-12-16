@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { AuthController } from '@/controllers/AuthController';
 import { authenticateToken } from '@/middleware/auth';
+import { authRateLimit } from '@/middleware/rateLimit';
+import { auditAction } from '@/middleware/audit';
 
 const router = Router();
 const authController = new AuthController();
@@ -98,7 +100,14 @@ const authController = new AuthController();
  *       429:
  *         description: Too many login attempts
  */
-router.post('/login', authController.login);
+router.post('/login',
+  authRateLimit,
+  auditAction({
+    resource: 'auth',
+    action: 'LOGIN',
+  }),
+  authController.loginHandler
+);
 
 /**
  * @swagger
@@ -141,7 +150,7 @@ router.post('/login', authController.login);
  *       401:
  *         description: Invalid or expired refresh token
  */
-router.post('/refresh', authController.refreshToken);
+router.post('/refresh', authController.refreshTokenHandler);
 
 /**
  * @swagger
@@ -171,7 +180,14 @@ router.post('/refresh', authController.refreshToken);
  *       401:
  *         description: Not authenticated
  */
-router.post('/logout', authenticateToken, authController.logout);
+router.post('/logout',
+  authenticateToken,
+  auditAction({
+    resource: 'auth',
+    action: 'LOGOUT',
+  }),
+  authController.logoutHandler
+);
 
 /**
  * @swagger
@@ -226,7 +242,7 @@ router.post('/logout', authenticateToken, authController.logout);
  *       401:
  *         description: Not authenticated
  */
-router.get('/profile', authenticateToken, authController.getProfile);
+router.get('/profile', authenticateToken, authController.getProfileHandler);
 
 /**
  * @swagger
@@ -264,7 +280,15 @@ router.get('/profile', authenticateToken, authController.getProfile);
  *       401:
  *         description: Not authenticated or current password incorrect
  */
-router.post('/change-password', authenticateToken, authController.changePassword);
+router.post('/change-password',
+  authenticateToken,
+  auditAction({
+    resource: 'auth',
+    action: 'CHANGE_PASSWORD',
+    getSensitiveData: (req) => ({ newPassword: '[REDACTED]' }),
+  }),
+  authController.changePasswordHandler
+);
 
 /**
  * @swagger
@@ -317,6 +341,6 @@ router.post('/change-password', authenticateToken, authController.changePassword
  *       401:
  *         description: Invalid or expired token
  */
-router.post('/validate', authController.validateToken);
+router.post('/validate', authController.validateTokenHandler);
 
 export default router;

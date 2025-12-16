@@ -25,7 +25,7 @@ export function useFamiliasDisfuncionales() {
       const data = await FamiliaDisfuncionalService.getFamilias(filtros)
       setFamilias(data)
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -49,7 +49,7 @@ export function useFamiliasDisfuncionales() {
       await loadFamilias()
       return nuevaFamilia
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }
@@ -66,7 +66,7 @@ export function useFamiliasDisfuncionales() {
       )
       return familiaActualizada
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }
@@ -76,7 +76,7 @@ export function useFamiliasDisfuncionales() {
       await FamiliaDisfuncionalService.deleteFamilia(id)
       setFamilias(familias.filter((f) => f.id !== id))
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }

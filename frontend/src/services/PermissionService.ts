@@ -1,7 +1,7 @@
 // services/PermissionService.ts
 // Single Responsibility: Verificación de permisos
 
-import { supabase } from '@/lib/supabase'
+import apiClient from '@/lib/api'
 
 export class PermissionService {
   // Verificar si un usuario tiene permiso para realizar una acción
@@ -11,20 +11,51 @@ export class PermissionService {
     accion: string
   ): Promise<boolean> {
     try {
-      const { data, error } = await supabase.rpc('verificar_permiso', {
-        p_usuario_id: usuarioId,
-        p_modulo_codigo: moduloCodigo,
-        p_accion: accion,
+      const response = await apiClient.post<{ hasPermission: boolean }>('/permissions/check', {
+        usuarioId,
+        moduloCodigo,
+        accion,
       })
 
-      if (error) {
-        console.error('Error verificando permiso:', error)
-        return false
+      if (response.success && response.data) {
+        return response.data.hasPermission
       }
 
-      return data ?? false
+      return false
     } catch (error) {
-      console.error('Error en verificarPermiso:', error)
+      console.error('Error verificando permiso:', error)
+      return false
+    }
+  }
+
+  // Obtener todos los permisos del usuario actual
+  static async getCurrentUserPermissions(): Promise<string[]> {
+    try {
+      const response = await apiClient.get<{ permissions: string[] }>('/permissions/me')
+
+      if (response.success && response.data) {
+        return response.data.permissions
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error obteniendo permisos del usuario:', error)
+      return []
+    }
+  }
+
+  // Verificar si el usuario actual tiene un permiso específico
+  static async hasPermission(accion: string): Promise<boolean> {
+    try {
+      const response = await apiClient.get<{ hasPermission: boolean }>(`/permissions/check/${accion}`)
+
+      if (response.success && response.data) {
+        return response.data.hasPermission
+      }
+
+      return false
+    } catch (error) {
+      console.error('Error verificando permiso:', error)
       return false
     }
   }

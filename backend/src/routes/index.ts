@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
+import usersRoutes from './users.routes';
 import { generalRateLimit } from '@/middleware/rateLimit';
 import { authenticateToken } from '@/middleware/auth';
 
@@ -30,6 +31,9 @@ router.get('/version', (req, res) => {
 
 // Mount authentication routes
 router.use('/auth', authRoutes);
+
+// Mount user routes (protected)
+router.use('/users', authenticateToken, usersRoutes);
 
 // Protected routes (require authentication)
 router.use('/api/v1', authenticateToken, (req, res, next) => {

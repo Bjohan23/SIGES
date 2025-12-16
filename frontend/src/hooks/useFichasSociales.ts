@@ -29,7 +29,7 @@ export function useFichasSociales() {
       const data = await FichaSocialService.getFichas(filtros)
       setFichas(data)
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -48,7 +48,7 @@ export function useFichasSociales() {
       setFichas([nuevaFicha, ...fichas])
       return nuevaFicha
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }
@@ -66,7 +66,7 @@ export function useFichasSociales() {
       setFichas(fichas.map((f) => (f.id === id ? fichaActualizada : f)))
       return fichaActualizada
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }
@@ -76,7 +76,7 @@ export function useFichasSociales() {
       await FichaSocialService.deleteFicha(id)
       setFichas(fichas.filter((f) => f.id !== id))
     } catch (err: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(err)
+      const errorMessage = ErrorHandler.handleApiError(err)
       throw new Error(errorMessage)
     }
   }

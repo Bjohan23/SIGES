@@ -17,7 +17,15 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
-    return next(new AuthenticationError('Access token required'));
+    return res.status(401).json({
+      success: false,
+      error: {
+        message: 'Access token required',
+        statusCode: 401,
+        isOperational: true,
+      },
+      timestamp: new Date().toISOString(),
+    });
   }
 
   try {
@@ -33,7 +41,15 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
 
     next();
   } catch (error) {
-    next(new AuthenticationError('Invalid or expired token'));
+    res.status(401).json({
+      success: false,
+      error: {
+        message: 'Invalid or expired token',
+        statusCode: 401,
+        isOperational: true,
+      },
+      timestamp: new Date().toISOString(),
+    });
   }
 }
 

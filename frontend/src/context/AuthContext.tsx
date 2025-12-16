@@ -20,33 +20,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Cargar usuario al iniciar
   useEffect(() => {
     checkUser()
-
-    // Escuchar cambios en autenticación
-    const { data: authListener } = AuthService.onAuthStateChange(
-      async (authUser) => {
-        if (authUser) {
-          await loadUserProfile(authUser.id)
-        } else {
-          setUser(null)
-          setLoading(false)
-        }
-      }
-    )
-
-    return () => {
-      authListener?.subscription.unsubscribe()
-    }
   }, [])
 
   // Verificar si hay usuario autenticado
   async function checkUser() {
     try {
-      const authUser = await AuthService.getCurrentAuthUser()
-      if (authUser) {
-        await loadUserProfile(authUser.id)
+      // Obtener usuario actual usando el nuevo servicio
+      const userProfile = await UserService.getCurrentUserProfile()
+      if (userProfile) {
+        setUser(userProfile)
       }
     } catch (error) {
       console.error('Error al verificar usuario:', error)
+      setUser(null)
     } finally {
       setLoading(false)
     }
@@ -67,11 +53,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login(email: string, password: string) {
     try {
       setLoading(true)
-      const authUser = await AuthService.login(email, password)
-      await loadUserProfile(authUser.id)
-      router.push('/dashboard')
+      const authResponse = await AuthService.login(email, password)
+      // Obtener perfil completo del usuario después del login
+      const userProfile = await UserService.getCurrentUserProfile()
+      if (userProfile) {
+        setUser(userProfile)
+        router.push('/dashboard')
+      } else {
+        throw new Error('No se pudo cargar el perfil del usuario')
+      }
     } catch (error: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(error)
+      const errorMessage = error.message || 'Error al iniciar sesión'
       throw new Error(errorMessage)
     } finally {
       setLoading(false)
@@ -86,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null)
       router.push('/')
     } catch (error: any) {
-      const errorMessage = ErrorHandler.handleSupabaseError(error)
+      const errorMessage = error.message || 'Error al cerrar sesión'
       throw new Error(errorMessage)
     } finally {
       setLoading(false)
@@ -96,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Refrescar datos del usuario
   async function refreshUser() {
     if (user) {
-      await loadUserProfile(user.auth_user_id)
+      await checkUser()
     }
   }
 
