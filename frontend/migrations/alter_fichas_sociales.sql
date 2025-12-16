@@ -1,5 +1,3 @@
--- Migración para agregar campos faltantes a fichas_sociales
--- Fecha: 2025-10-28
 
 -- 1. Agregar campos para datos del estudiante
 ALTER TABLE public.fichas_sociales

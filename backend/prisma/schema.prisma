@@ -1,0 +1,211 @@
+// Prisma schema for SIGES database
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum EstadoCivil {
+  SOLTERO
+  CASADO
+  DIVORCIADO
+  VIUDO
+  CONVIVIENTE
+}
+
+enum EstadoFicha {
+  INCOMPLETA
+  COMPLETA
+  EN_REVISION
+  APROBADA
+  RECHAZADA
+}
+
+enum Sexo {
+  M
+  F
+}
+
+// Audit model
+model Auditoria {
+  id              String    @id @default(uuid())
+  accion          String
+  recurso         String
+  id_recurso      String
+  id_usuario      String
+  ip              String?
+  user_agent      String?
+  datos_sensibles Json?
+  estado          String    @default("EXITOSO") // EXITOSO, FALLIDO
+  fecha           DateTime  @default(now())
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id])
+
+  @@map("auditorias")
+}
+
+// Rate limiting model
+model RateLimit {
+  id     String   @id @default(uuid())
+  clave  String
+  fecha  DateTime @default(now())
+
+  @@unique([clave, fecha])
+  @@map("rate_limits")
+}
+
+// Users
+model Usuario {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  nombres           String
+  apellidos         String
+  dni               String?   @unique
+  telefono          String?
+  activo            Boolean   @default(true)
+  email_verificado  Boolean   @default(false)
+  ultimo_login      DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  rol_id            String
+  rol               Rol       @relation(fields: [rol_id], references: [id])
+
+  fichas_sociales     FichaSocial[]
+  entrevistas_aplicadas EntrevistaAplicada[]
+  auditorias         Auditoria[]
+
+  @@map("usuarios")
+}
+
+// Roles
+model Rol {
+  id          String   @id @default(uuid())
+  nombre      String   @unique
+  descripcion String?
+  es_sistema  Boolean  @default(false)
+  activo      Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  usuarios    Usuario[]
+  modulos     RolModulo[]
+
+  @@map("roles")
+}
+
+// Modules
+model Modulo {
+  id          String   @id @default(uuid())
+  nombre      String   @unique
+  codigo      String   @unique
+  descripcion String?
+  activo      Boolean  @default(true)
+  created_at  DateTime @default(now())
+
+  roles       RolModulo[]
+
+  @@map("modulos")
+}
+
+// Role-Module relationship
+model RolModulo {
+  id       String @id @default(uuid())
+  rol_id   String
+  modulo_id String
+
+  rol    Rol    @relation(fields: [rol_id], references: [id], onDelete: Cascade)
+  modulo Modulo @relation(fields: [modulo_id], references: [id], onDelete: Cascade)
+
+  @@unique([rol_id, modulo_id])
+  @@map("roles_modulos")
+}
+
+// Ficha Social
+model FichaSocial {
+  id                   String      @id @default(uuid())
+  apellidos            String
+  nombres              String
+  sexo                 Sexo?
+  nacionalidad         String?
+  fecha_nacimiento     DateTime
+  dni                  String?     @unique
+  carne_extranjeria    String?
+  nivel_educativo      String?
+  estado_civil         EstadoCivil?
+  num_hijos            Int         @default(0)
+  domicilio_actual     String?
+  distrito             String?
+
+  // JSON fields for complex data
+  datos_vivienda       Json        @default("{\"material\": [], \"tenencia\": [], \"servicios\": [], \"ubicacion\": [], \"problemas_sociales\": []}")
+  datos_salud          Json        @default("{\"alergias\": {}, \"enfermedades\": {}, \"medicamentos\": [], \"grupo_sanguineo\": null}")
+  datos_economicos     Json        @default("{\"egresos\": {\"deudas_seguros\": {}, \"gastos_familiares\": {}, \"servicios_basicos\": {}}, \"ingresos\": {\"otros\": 0, \"conyuge\": 0, \"trabajador\": 0}}")
+  declaracion_jurada   Json        @default("{\"fecha_firma\": null, \"firma_digital\": null, \"acepta_terminos\": false, \"nombre_firmante\": null}")
+
+  estado               EstadoFicha @default(INCOMPLETA)
+  porcentaje_completado Int         @default(0)
+
+  created_by           String?
+  updated_by           String?
+  created_at           DateTime    @default(now())
+  updated_at           DateTime    @updatedAt
+
+  creador              Usuario?            @relation("FichaCreador", fields: [created_by], references: [id])
+  actualizador         Usuario?            @relation("FichaActualizador", fields: [updated_by], references: [id])
+  entrevistas          EntrevistaAplicada[]
+
+  @@index([apellidos])
+  @@index([nombres])
+  @@index([dni])
+  @@index([estado])
+  @@index([distrito])
+  @@index([created_at])
+  @@index(map: "idx_fichas_busqueda", type: Gin, fields: [search_vector])
+  @@map("fichas_sociales")
+}
+
+// Entrevista Aplicada
+model EntrevistaAplicada {
+  id                     String      @id @default(uuid())
+  ficha_social_id        String?
+  estudiante_nombres     String
+  estudiante_apellidos   String
+  estudiante_edad        Int?
+  estudiante_fecha_nacimiento DateTime?
+  aula                   String?
+  grado                  String?
+
+  // JSON field for answers
+  respuestas             Json        @default("{\"pregunta_1\": \"\", \"pregunta_3\": \"\", \"pregunta_4\": \"\", \"pregunta_5\": \"\", \"pregunta_6\": \"\", \"pregunta_7\": \"\", \"pregunta_8\": \"\", \"pregunta_9\": \"\", \"pregunta_10\": \"\", \"pregunta_2_opcion\": \"\", \"pregunta_2_porque\": \"\"}")
+
+  estado                 EstadoFicha @default(INCOMPLETA)
+  porcentaje_completado  Int         @default(0)
+
+  created_by             String?
+  updated_by             String?
+  created_at             DateTime    @default(now())
+  updated_at             DateTime    @updatedAt
+
+  ficha_social           FichaSocial? @relation(fields: [ficha_social_id], references: [id], onDelete: SetNull)
+  creador                Usuario?     @relation("EntrevistaCreador", fields: [created_by], references: [id])
+  actualizador           Usuario?     @relation("EntrevistaActualizador", fields: [updated_by], references: [id])
+
+  @@index([estudiante_apellidos, estudiante_nombres])
+  @@index([ficha_social_id])
+  @@index([estado])
+  @@index([grado])
+  @@index([created_at])
+  @@map("entrevistas_aplicadas")
+}
+
+// Functions for PostgreSQL triggers
+model PrismaTrigger {
+  // This is a placeholder for trigger functions
+  // The actual triggers are defined in SQL migration files
+}
