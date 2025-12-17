@@ -1,32 +1,26 @@
 // components/FichasTable.tsx
 // Single Responsibility: Tabla de fichas sociales
 
+'use client'
+
+import { Fragment } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
 import type { FichaSocial } from '@/types'
 import { fichaSocialAlerts } from '@/components/FichaSocialAlert'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface FichasTableProps {
   fichas: FichaSocial[]
   onDelete: (id: string) => void
 }
 
-const handleDeleteConfirm = (ficha: FichaSocial, onDelete: (id: string) => void) => {
-  // Show warning alert with ficha details
-  fichaSocialAlerts.warning(
-    ficha,
-    "¿Confirmar eliminación?",
-    `¿Está seguro de eliminar esta ficha social? Esta acción no se puede deshacer.`
-  );
-
-  // Still use native confirm for actual confirmation (could be improved with a modal)
-  setTimeout(() => {
-    if (confirm(`¿Estás seguro de eliminar la ficha de ${ficha.nombres} ${ficha.apellidos}?`)) {
-      onDelete(ficha.id);
-    }
-  }, 1000);
-}
-
 export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    ficha: FichaSocial | null
+  }>({ isOpen: false, ficha: null })
+
   const getEstadoBadge = (estado: string) => {
     const badges = {
       completa: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
@@ -36,16 +30,56 @@ export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
     return badges[estado as keyof typeof badges] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
   }
 
+  const handleDeleteClick = (ficha: FichaSocial) => {
+    // Show warning alert with ficha details
+    fichaSocialAlerts.warning(
+      ficha,
+      "¿Confirmar eliminación?",
+      `¿Está seguro de eliminar esta ficha social? Esta acción no se puede deshacer.`
+    );
+
+    // Open modern confirmation dialog
+    setTimeout(() => {
+      setDeleteDialog({
+        isOpen: true,
+        ficha
+      });
+    }, 1000);
+  }
+
+  const handleDeleteConfirm = () => {
+    if (deleteDialog.ficha) {
+      onDelete(deleteDialog.ficha.id);
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({ isOpen: false, ficha: null });
+  }
+
   if (fichas.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-8 text-center border border-transparent dark:border-gray-700">
-        <p className="text-gray-500 dark:text-gray-400">No se encontraron fichas sociales</p>
-      </div>
+      <Fragment>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-8 text-center border border-transparent dark:border-gray-700">
+          <p className="text-gray-500 dark:text-gray-400">No se encontraron fichas sociales</p>
+        </div>
+        <ConfirmDialog
+          isOpen={deleteDialog.isOpen}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="¿Eliminar ficha social?"
+          message={`¿Estás seguro de que quieres eliminar la ficha de ${deleteDialog.ficha?.nombres} ${deleteDialog.ficha?.apellidos}? Esta acción no se puede deshacer.`}
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
+      </Fragment>
     )
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 overflow-hidden border border-transparent dark:border-gray-700">
+    <Fragment>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 overflow-hidden border border-transparent dark:border-gray-700">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900">
@@ -113,7 +147,7 @@ export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-3">
                     <Link
-                      href={`/fichas-sociales/${ficha.id}`}
+                      href={`/fichas-sociales/${ficha.id}/detail`}
                       className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors"
                       title="Ver detalles"
                     >
@@ -143,7 +177,7 @@ export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => handleDeleteConfirm(ficha, onDelete)}
+                      onClick={() => handleDeleteClick(ficha)}
                       className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                       title="Eliminar"
                     >
@@ -159,5 +193,17 @@ export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
         </table>
       </div>
     </div>
+
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="¿Eliminar ficha social?"
+        message={`¿Estás seguro de que quieres eliminar la ficha de ${deleteDialog.ficha?.nombres} ${deleteDialog.ficha?.apellidos}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
+    </Fragment>
   )
 }

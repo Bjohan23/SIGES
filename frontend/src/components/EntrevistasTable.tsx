@@ -1,9 +1,14 @@
 // components/EntrevistasTable.tsx
 // Single Responsibility: Tabla de entrevistas
 
+'use client'
+
+import { Fragment } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
 import type { EntrevistaAplicada } from '@/types'
 import { fichaSocialAlerts } from '@/components/FichaSocialAlert'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface EntrevistasTableProps {
   entrevistas: EntrevistaAplicada[]
@@ -14,51 +19,80 @@ export default function EntrevistasTable({
   entrevistas,
   onDelete,
 }: EntrevistasTableProps) {
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    entrevista: EntrevistaAplicada | null
+  }>({ isOpen: false, entrevista: null })
+
   const getEstadoBadge = (estado: string) => {
     return estado === 'completa'
       ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
       : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
   }
 
-const handleDeleteConfirm = (entrevista: EntrevistaAplicada, onDelete: (id: string) => void) => {
-  // Show warning alert with entrevista details
-  fichaSocialAlerts.warning(
-    {
-      id: entrevista.id,
-      nombres: entrevista.estudiante_nombres || '',
-      apellidos: entrevista.estudiante_apellidos || '',
-      dni: entrevista.estudiante_dni || '',
-      distrito: '',
-      estado: entrevista.estado || 'COMPLETADA',
-      porcentaje_completado: entrevista.porcentaje_completado || 100,
-      created_at: entrevista.created_at,
-      updated_at: entrevista.updated_at,
-      creador: null,
-      actualizador: null,
-      _count: { entrevistas: 0 }
-    },
-    "¿Confirmar eliminación?",
-    `¿Está seguro de eliminar esta entrevista? Esta acción no se puede deshacer.`
-  );
+  const handleDeleteClick = (entrevista: EntrevistaAplicada) => {
+    // Show warning alert with entrevista details
+    fichaSocialAlerts.warning(
+      {
+        id: entrevista.id,
+        nombres: entrevista.estudiante_nombres || '',
+        apellidos: entrevista.estudiante_apellidos || '',
+        dni: entrevista.estudiante_dni || '',
+        distrito: '',
+        estado: entrevista.estado || 'COMPLETADA',
+        porcentaje_completado: entrevista.porcentaje_completado || 100,
+        created_at: entrevista.created_at,
+        updated_at: entrevista.updated_at,
+        creador: null,
+        actualizador: null,
+        _count: { entrevistas: 0 }
+      },
+      "¿Confirmar eliminación?",
+      `¿Está seguro de eliminar esta entrevista? Esta acción no se puede deshacer.`
+    );
 
-  // Still use native confirm for actual confirmation (could be improved with a modal)
-  setTimeout(() => {
-    if (confirm(`¿Estás seguro de eliminar la entrevista de ${entrevista.estudiante_nombres} ${entrevista.estudiante_apellidos}?`)) {
-      onDelete(entrevista.id);
+    // Open modern confirmation dialog
+    setTimeout(() => {
+      setDeleteDialog({
+        isOpen: true,
+        entrevista
+      });
+    }, 1000);
+  }
+
+  const handleDeleteConfirm = () => {
+    if (deleteDialog.entrevista) {
+      onDelete(deleteDialog.entrevista.id);
     }
-  }, 1000);
-}
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({ isOpen: false, entrevista: null });
+  }
 
   if (entrevistas.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-8 text-center border border-transparent dark:border-gray-700">
-        <p className="text-gray-500 dark:text-gray-400">No se encontraron entrevistas</p>
-      </div>
+      <Fragment>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-8 text-center border border-transparent dark:border-gray-700">
+          <p className="text-gray-500 dark:text-gray-400">No se encontraron entrevistas</p>
+        </div>
+        <ConfirmDialog
+          isOpen={deleteDialog.isOpen}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="¿Eliminar entrevista?"
+          message={`¿Estás seguro de que quieres eliminar la entrevista de ${deleteDialog.entrevista?.estudiante_nombres} ${deleteDialog.entrevista?.estudiante_apellidos}? Esta acción no se puede deshacer.`}
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
+      </Fragment>
     )
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 overflow-hidden border border-transparent dark:border-gray-700">
+    <Fragment>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 overflow-hidden border border-transparent dark:border-gray-700">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900">
@@ -140,7 +174,7 @@ const handleDeleteConfirm = (entrevista: EntrevistaAplicada, onDelete: (id: stri
                     Editar
                   </Link>
                   <button
-                    onClick={() => handleDeleteConfirm(entrevista, onDelete)}
+                    onClick={() => handleDeleteClick(entrevista)}
                     className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                   >
                     Eliminar
@@ -151,6 +185,18 @@ const handleDeleteConfirm = (entrevista: EntrevistaAplicada, onDelete: (id: stri
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="¿Eliminar entrevista?"
+        message={`¿Estás seguro de que quieres eliminar la entrevista de ${deleteDialog.entrevista?.estudiante_nombres} ${deleteDialog.entrevista?.estudiante_apellidos}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
+    </Fragment>
   )
 }

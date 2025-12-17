@@ -1,7 +1,12 @@
 // components/FamiliasTable.tsx
 // Single Responsibility: Tabla de familias disfuncionales
 
+'use client'
+
+import { Fragment } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface FamiliasTableProps {
   familias: any[]
@@ -12,16 +17,51 @@ export default function FamiliasTable({
   familias,
   onDelete,
 }: FamiliasTableProps) {
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    familia: any | null
+  }>({ isOpen: false, familia: null })
+
+  const handleDeleteClick = (familia: any) => {
+    setDeleteDialog({
+      isOpen: true,
+      familia
+    });
+  }
+
+  const handleDeleteConfirm = () => {
+    if (deleteDialog.familia) {
+      onDelete(deleteDialog.familia.id);
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({ isOpen: false, familia: null });
+  }
+
   if (familias.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <p className="text-gray-500">No se encontraron familias disfuncionales</p>
-      </div>
+      <Fragment>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-8 text-center border border-transparent dark:border-gray-700">
+          <p className="text-gray-500 dark:text-gray-400">No se encontraron familias disfuncionales</p>
+        </div>
+        <ConfirmDialog
+          isOpen={deleteDialog.isOpen}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="¿Eliminar familia?"
+          message={`¿Estás seguro de que quieres eliminar a la familia de ${deleteDialog.familia?.apellidos_familia}, ${deleteDialog.familia?.nombres_familia}? Esta acción no se puede deshacer.`}
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
+      </Fragment>
     )
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <Fragment>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 overflow-hidden border border-transparent dark:border-gray-700">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -88,16 +128,9 @@ export default function FamiliasTable({
                     Editar
                   </Link>
                   <button
-                    onClick={() => {
-                      if (
-                        confirm(
-                          '¿Estás seguro de eliminar este registro?'
-                        )
-                      ) {
-                        onDelete(familia.id)
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-900"
+                    type="button"
+                    onClick={() => handleDeleteClick(familia)}
+                    className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                   >
                     Eliminar
                   </button>
@@ -107,6 +140,18 @@ export default function FamiliasTable({
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="¿Eliminar familia?"
+        message={`¿Estás seguro de que quieres eliminar a la familia de ${deleteDialog.familia?.apellidos_familia}, ${deleteDialog.familia?.nombres_familia}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
+    </Fragment>
   )
 }

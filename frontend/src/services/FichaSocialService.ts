@@ -48,10 +48,11 @@ export class FichaSocialService {
   // Obtener una ficha por ID
   static async getFichaById(id: string): Promise<FichaSocial> {
     try {
-      const response = await apiClient.get<FichaSocial>(`/api/v1/fichas-sociales/${id}`)
+      const response = await apiClient.get<any>(`/api/v1/fichas-sociales/${id}`)
 
       if (response.success && response.data) {
-        return response.data
+        // La API devuelve { success: true, data: { ficha: {...} } }
+        return response.data.ficha || response.data
       }
 
       throw new Error('Ficha no encontrada')

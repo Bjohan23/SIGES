@@ -148,6 +148,7 @@ model FichaSocial {
   datos_vivienda       Json        @default("{\"material\": [], \"tenencia\": [], \"servicios\": [], \"ubicacion\": [], \"problemas_sociales\": []}")
   datos_salud          Json        @default("{\"alergias\": {}, \"enfermedades\": {}, \"medicamentos\": [], \"grupo_sanguineo\": null}")
   datos_economicos     Json        @default("{\"egresos\": {\"deudas_seguros\": {}, \"gastos_familiares\": {}, \"servicios_basicos\": {}}, \"ingresos\": {\"otros\": 0, \"conyuge\": 0, \"trabajador\": 0}}")
+  composicion_familiar Json        @default("{\"padre\": null, \"madre\": null}")
   declaracion_jurada   Json        @default("{\"fecha_firma\": null, \"firma_digital\": null, \"acepta_terminos\": false, \"nombre_firmante\": null}")
 
   estado               EstadoFicha @default(INCOMPLETA)

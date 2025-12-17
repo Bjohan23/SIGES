@@ -17,7 +17,9 @@
       "Bash(npx ts-node:*)",
       "Bash(npx prisma migrate:*)",
       "Bash(powershell \"Stop-Process -Id 38280 -Force\")",
-      "Bash(powershell \"Stop-Process -Id 18948 -Force\")"
+      "Bash(powershell \"Stop-Process -Id 18948 -Force\")",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma studio:*)"
     ],
     "deny": [],
     "ask": []

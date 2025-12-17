@@ -4,11 +4,35 @@
 :root {
   --background: #f9fafb;
   --foreground: #111827;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-text: #111827;
+  --placeholder-text: #6b7280;
+  --button-primary: #3b82f6;
+  --button-primary-hover: #2563eb;
+  --button-secondary: #6b7280;
+  --button-secondary-hover: #4b5563;
+  --text-muted: #6b7280;
+  --text-secondary: #374151;
 }
 
 .dark {
   --background: #111827;
   --foreground: #f9fafb;
+  --card-bg: #1f2937;
+  --card-border: #374151;
+  --input-bg: #374151;
+  --input-border: #4b5563;
+  --input-text: #f9fafb;
+  --placeholder-text: #9ca3af;
+  --button-primary: #3b82f6;
+  --button-primary-hover: #60a5fa;
+  --button-secondary: #6b7280;
+  --button-secondary-hover: #9ca3af;
+  --text-muted: #9ca3af;
+  --text-secondary: #d1d5db;
 }
 
 /* Gradiente para fondos */
@@ -23,4 +47,216 @@
 /* Transiciones suaves para el cambio de tema */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Asegurar que los inputs funcionen bien en modo oscuro */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--input-border);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--placeholder-text);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--button-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Asegurar que los botones sean visibles */
+.dark button {
+  color: var(--foreground);
+}
+
+/* Asegurar que los textos en etiquetas sean visibles */
+.dark label,
+.dark .form-label,
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+/* Forzar color de texto blanco en modo oscuro para elementos comunes */
+.dark .text-black,
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: var(--foreground) !important;
+}
+
+/* Asegurar que los cards tengan fondo apropiado */
+.dark .bg-white {
+  background-color: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+}
+
+/* Asegurar que los dropdowns/menús sean visibles */
+.dark .dropdown-content,
+.dark .menu,
+.dark .dropdown-menu {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+/* Asegurar que las tablas sean visibles */
+.dark table {
+  color: var(--foreground);
+}
+
+.dark th,
+.dark td {
+  border-color: var(--card-border);
+}
+
+.dark thead {
+  background-color: var(--input-bg);
+}
+
+/* Asegurar que los modals/overlays sean visibles */
+.dark .modal,
+.dark .overlay,
+.dark .dialog {
+  background-color: var(--card-bg);
+  color: var(--foreground);
+}
+
+/* Arreglar específicamente los problemas en familias disfuncionales */
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: var(--input-bg) !important;
+}
+
+.dark .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-900 {
+  color: var(--foreground) !important;
+}
+
+.dark .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+.dark .bg-red-50 {
+  background-color: #7f1d1d !important;
+  border-color: #dc2626 !important;
+}
+
+.dark .border-red-400 {
+  border-color: #dc2626 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: var(--input-border) !important;
+}
+
+/* Asegurar que checkboxes sean visibles */
+.dark input[type="checkbox"] {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+}
+
+.dark input[type="checkbox"]:checked {
+  background-color: var(--button-primary);
+  border-color: var(--button-primary);
+}
+
+/* Arreglar fondos grises comunes en modo oscuro */
+.dark .min-h-screen.bg-gray-50 {
+  background-color: var(--background) !important;
+}
+
+/* Arreglar tarjetas blancas con texto gris */
+.dark .bg-white.shadow {
+  background-color: var(--card-bg) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Asegurar que todos los párrafos y textos sean legibles */
+.dark p,
+.dark span,
+.dark div:not([class*="bg-"]):not([class*="text-"]) {
+  color: var(--foreground);
+}
+
+/* Forzar colores en elementos específicos */
+.dark .text-gray-400 {
+  color: var(--text-muted) !important;
+}
+
+.dark .text-gray-500 {
+  color: var(--text-muted) !important;
+}
+
+.dark .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-700 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-800 {
+  color: var(--foreground) !important;
+}
+
+.dark .text-gray-900 {
+  color: var(--foreground) !important;
+}
+
+/* Arreglar bordes grises */
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: var(--card-border) !important;
+}
+
+/* Arreglar fondos de sección */
+.dark .bg-gray-100 {
+  background-color: var(--input-bg) !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: var(--input-bg) !important;
+}
+
+/* Asegurar que los focus rings sean visibles en modo oscuro */
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus,
+.dark button:focus {
+  outline: 2px solid var(--button-primary);
+  outline-offset: 2px;
+}
+
+/* Arreglar selects y textareas que no estén cubiertos */
+.dark select,
+.dark textarea {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+.dark select:focus,
+.dark textarea:focus {
+  border-color: var(--button-primary) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.dark select option {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
 }

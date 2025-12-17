@@ -53,11 +53,7 @@ export class ErrorHandler {
     return error.message || 'Error desconocido. Intenta nuevamente.'
   }
 
-  // Mantener compatibilidad con código antiguo
-  static handleSupabaseError(error: any): string {
-    return this.handleApiError(error)
-  }
-
+  
   // Manejo de errores específicos
   static handleAuthError(error: any): string {
     if (error.message?.includes('Invalid login credentials')) {
