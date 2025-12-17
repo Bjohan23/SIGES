@@ -300,24 +300,8 @@ export default function EditarFichaSocialPage() {
   };
 
   const getProgress = () => {
-    // Calcular progreso basado en los campos llenos
-    let completedFields = 0;
-    let totalFields = 32;
-
-    // Validación simple del progreso
-    if (formData.apellido_paterno) completedFields++;
-    if (formData.apellido_materno) completedFields++;
-    if (formData.nombres) completedFields++;
-    if (formData.sexo) completedFields++;
-    if (formData.fecha_nacimiento) completedFields++;
-    if (formData.nacionalidad) completedFields++;
-    if (formData.dni || formData.carne_extranjeria) completedFields++;
-    if (formData.grado) completedFields++;
-    if (formData.seccion) completedFields++;
-    if (formData.domicilio_actual) completedFields++;
-    if (formData.distrito) completedFields++;
-
-    return Math.round((completedFields / totalFields) * 100);
+    // Usar el mismo cálculo que el servicio para consistencia
+    return FichaSocialService.calcularPorcentajeCompletado(formData);
   };
 
   const validateStep = (step: number) => {
@@ -347,7 +331,7 @@ export default function EditarFichaSocialPage() {
   };
 
   const canProceed = () => {
-    return getProgress() >= 100;
+    return getProgress() >= 80; // Permitir guardar con 80% de completado
   };
 
   const progress = getProgress();
@@ -394,8 +378,8 @@ export default function EditarFichaSocialPage() {
     try {
       setLoading(true);
 
-      // Preparar datos para enviar
-      const fichaData = {
+      // Preparar datos para enviar - limpiar campos vacíos y undefined
+      const fichaData: any = {
         apellido_paterno: formData.apellido_paterno,
         apellido_materno: formData.apellido_materno,
         nombres: formData.nombres,
@@ -405,8 +389,8 @@ export default function EditarFichaSocialPage() {
         nacionalidad: formData.nacionalidad,
         dni: formData.dni || undefined,
         carne_extranjeria: formData.carne_extranjeria || undefined,
-        grado: formData.grado,
-        seccion: formData.seccion,
+        grado: formData.grado || undefined,
+        seccion: formData.seccion || undefined,
         nivel_educativo: formData.nivel_educativo || undefined,
         estado_civil: formData.estado_civil?.toUpperCase() as any,
         num_hijos: formData.num_hijos,
@@ -418,6 +402,13 @@ export default function EditarFichaSocialPage() {
         datos_salud: formData.datos_salud,
         declaracion_jurada: formData.declaracion_jurada,
       };
+
+      // Eliminar campos undefined para no enviarlos al backend
+      Object.keys(fichaData).forEach(key => {
+        if (fichaData[key] === undefined) {
+          delete fichaData[key];
+        }
+      });
 
       const updatedFicha = await FichaSocialService.updateFicha(fichaId, fichaData, user.id);
 

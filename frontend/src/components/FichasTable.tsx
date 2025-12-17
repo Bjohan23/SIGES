@@ -147,7 +147,7 @@ export default function FichasTable({ fichas, onDelete }: FichasTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-3">
                     <Link
-                      href={`/fichas-sociales/${ficha.id}/detail`}
+                      href={`/fichas-sociales/${ficha.id}`}
                       className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors"
                       title="Ver detalles"
                     >

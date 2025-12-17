@@ -100,13 +100,16 @@ export default function FichaSocialDetailPage() {
     )
   }
 
+  // Calcular porcentaje correcto en lugar de usar el del backend
+  const porcentajeCorrecto = FichaSocialService.calcularPorcentajeCompletado(ficha);
+
   const totales = ficha.datos_economicos ? {
-    ingresos: (ficha.datos_economicos.ingresos.trabajador || 0) +
-              (ficha.datos_economicos.ingresos.conyuge || 0) +
-              (ficha.datos_economicos.ingresos.otros || 0),
-    egresos: Object.values(ficha.datos_economicos.egresos.servicios_basicos || {}).reduce((sum, val) => sum + (val || 0), 0) +
-             Object.values(ficha.datos_economicos.egresos.gastos_familiares || {}).reduce((sum, val) => sum + (val || 0), 0) +
-             Object.values(ficha.datos_economicos.egresos.deudas_seguros || {}).reduce((sum, val) => sum + (val || 0), 0)
+    ingresos: (ficha.datos_economicos.ingresos?.trabajador || 0) +
+              (ficha.datos_economicos.ingresos?.conyuge || 0) +
+              (ficha.datos_economicos.ingresos?.otros || 0),
+    egresos: Object.values(ficha.datos_economicos.egresos?.servicios_basicos || {}).reduce((sum, val) => sum + (val || 0), 0) +
+             Object.values(ficha.datos_economicos.egresos?.gastos_familiares || {}).reduce((sum, val) => sum + (val || 0), 0) +
+             Object.values(ficha.datos_economicos.egresos?.deudas_seguros || {}).reduce((sum, val) => sum + (val || 0), 0)
   } : { ingresos: 0, egresos: 0 }
 
   return (
@@ -121,7 +124,7 @@ export default function FichaSocialDetailPage() {
               Ficha Social
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {ficha.apellidos || `${ficha.apellido_paterno || ''} ${ficha.apellido_materno || ''}`.trim()} {ficha.nombres}
+              {`${ficha.apellido_paterno || ''} ${ficha.apellido_materno || ''}`.trim() || 'N/A'} {ficha.nombres || ''}
             </p>
           </div>
           <div className="flex space-x-3">
@@ -152,11 +155,11 @@ export default function FichaSocialDetailPage() {
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Estado</p>
               <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                ficha.estado === 'COMPLETA' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
-                ficha.estado === 'INCOMPLETA' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' :
+                porcentajeCorrecto === 100 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
+                porcentajeCorrecto >= 80 ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' :
                 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
               }`}>
-                {ficha.estado}
+                {porcentajeCorrecto === 100 ? 'COMPLETA' : porcentajeCorrecto >= 80 ? 'CASI COMPLETA' : 'INCOMPLETA'}
               </span>
             </div>
             <div>
@@ -165,11 +168,11 @@ export default function FichaSocialDetailPage() {
                 <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3 mr-3">
                   <div
                     className="bg-blue-600 dark:bg-blue-500 h-3 rounded-full"
-                    style={{ width: `${ficha.porcentaje_completado}%` }}
+                    style={{ width: `${porcentajeCorrecto}%` }}
                   />
                 </div>
                 <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                  {ficha.porcentaje_completado}%
+                  {porcentajeCorrecto}%
                 </span>
               </div>
             </div>
@@ -188,7 +191,7 @@ export default function FichaSocialDetailPage() {
             Datos del Estudiante
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InfoField label="Apellidos" value={ficha.apellidos || 'N/A'} />
+            <InfoField label="Apellidos" value={`${ficha.apellido_paterno || ''} ${ficha.apellido_materno || ''}`.trim() || 'N/A'} />
             <InfoField label="Nombres" value={ficha.nombres} />
             <InfoField label="Sexo" value={ficha.sexo === 'M' ? 'Masculino' : 'Femenino'} />
             <InfoField label="Fecha de Nacimiento" value={formatDate(ficha.fecha_nacimiento)} />
@@ -480,13 +483,15 @@ function InfoField({
   className = ''
 }: {
   label: string
-  value: string
+  value?: string | number | null | undefined
   className?: string
 }) {
+  const displayValue = value !== undefined && value !== null && value !== '' ? String(value) : 'N/A'
+
   return (
     <div className={className}>
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
-      <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">{value}</p>
+      <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">{displayValue}</p>
     </div>
   )
 }
