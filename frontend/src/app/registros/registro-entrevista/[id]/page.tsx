@@ -398,27 +398,6 @@ export default function RegistroEntrevistaDetallePage() {
               </p>
             </div>
 
-            {/* Información del estudiante */}
-            {registro.estudiante && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
-                  Información del Estudiante
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Código:</span>
-                    <p className="font-medium text-gray-900 dark:text-gray-100">{registro.estudiante.codigo}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Nombre completo:</span>
-                    <p className="font-medium text-gray-900 dark:text-gray-100">
-                      {registro.estudiante.nombres} {registro.estudiante.apellido_paterno} {registro.estudiante.apellido_materno}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Información del registro */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">

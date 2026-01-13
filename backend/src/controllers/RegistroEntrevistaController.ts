@@ -22,13 +22,11 @@ export class RegistroEntrevistaController extends BaseController {
 
     const page = Math.max(1, parseInt(req.query.page as string) || 1)
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20))
-    const estudiante_id = req.query.estudiante_id as string
     const search = req.query.search as string
 
     const result = await this.registroEntrevistaService.findAll({
       page,
       limit,
-      estudiante_id,
       search,
     })
 
@@ -69,7 +67,6 @@ export class RegistroEntrevistaController extends BaseController {
     const userId = this.getUserIdFromRequest(req) || undefined
 
     const data: CreateRegistroEntrevistaData = {
-      estudiante_id: req.body.estudiante_id,
       lugar: req.body.lugar,
       fecha: req.body.fecha ? new Date(req.body.fecha) : undefined,
       hora: req.body.hora,
@@ -97,7 +94,6 @@ export class RegistroEntrevistaController extends BaseController {
     const userId = this.getUserIdFromRequest(req) || undefined
 
     const data: UpdateRegistroEntrevistaData = {
-      estudiante_id: req.body.estudiante_id,
       lugar: req.body.lugar,
       fecha: req.body.fecha ? new Date(req.body.fecha) : undefined,
       hora: req.body.hora,

@@ -1,13 +1,12 @@
 import { BaseService } from './BaseService';
 import { PrismaClient, RegistroEntrevista } from '@prisma/client';
-import { ValidationError, NotFoundError } from '@/utils/errors';
+import { NotFoundError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 import { IPaginationQuery, IPaginatedResponse } from '@/interfaces/IService';
 
 const prisma = new PrismaClient();
 
 export interface CreateRegistroEntrevistaData {
-  estudiante_id?: string;
   lugar?: string;
   fecha?: Date;
   hora?: string;
@@ -20,7 +19,6 @@ export interface CreateRegistroEntrevistaData {
 }
 
 export interface UpdateRegistroEntrevistaData {
-  estudiante_id?: string;
   lugar?: string;
   fecha?: Date;
   hora?: string;
@@ -41,9 +39,9 @@ export class RegistroEntrevistaService extends BaseService<RegistroEntrevista, s
     return 'RegistroEntrevista';
   }
 
-  async create(data: CreateRegistroEntrevistaData): Promise<RegistroEntrevista> {
+  override async create(data: CreateRegistroEntrevistaData): Promise<RegistroEntrevista> {
     try {
-      logger.info('Creating RegistroEntrevista', { estudiante_id: data.estudiante_id });
+      logger.info('Creating RegistroEntrevista', { tema: data.tema });
       const result = await prisma.registroEntrevista.create({
         data,
       });
@@ -54,7 +52,7 @@ export class RegistroEntrevistaService extends BaseService<RegistroEntrevista, s
     }
   }
 
-  async update(id: string, data: UpdateRegistroEntrevistaData): Promise<RegistroEntrevista> {
+  override async update(id: string, data: UpdateRegistroEntrevistaData): Promise<RegistroEntrevista> {
     try {
       const existing = await prisma.registroEntrevista.findUnique({
         where: { id },
@@ -79,25 +77,19 @@ export class RegistroEntrevistaService extends BaseService<RegistroEntrevista, s
     }
   }
 
-  async findAll(query: IPaginationQuery & {
-    estudiante_id?: string;
+  override async findAll(query: IPaginationQuery & {
     search?: string;
   } = {}): Promise<IPaginatedResponse<RegistroEntrevista>> {
     try {
       const {
         page = 1,
         limit = 20,
-        estudiante_id,
         search,
       } = query;
 
       const skip = (page - 1) * limit;
 
       const where: any = {};
-
-      if (estudiante_id) {
-        where.estudiante_id = estudiante_id;
-      }
 
       if (search) {
         where.OR = [
@@ -114,15 +106,6 @@ export class RegistroEntrevistaService extends BaseService<RegistroEntrevista, s
           take: limit,
           orderBy: { created_at: 'desc' },
           include: {
-            estudiante: {
-              select: {
-                id: true,
-                codigo: true,
-                nombres: true,
-                apellido_paterno: true,
-                apellido_materno: true,
-              },
-            },
             creador: {
               select: {
                 id: true,
@@ -154,22 +137,11 @@ export class RegistroEntrevistaService extends BaseService<RegistroEntrevista, s
     }
   }
 
-  async findById(id: string): Promise<RegistroEntrevista> {
+  override async findById(id: string): Promise<RegistroEntrevista> {
     try {
       const result = await prisma.registroEntrevista.findUnique({
         where: { id },
         include: {
-          estudiante: {
-            select: {
-              id: true,
-              codigo: true,
-              nombres: true,
-              apellido_paterno: true,
-              apellido_materno: true,
-              fecha_nacimiento: true,
-              dni: true,
-            },
-          },
           creador: {
             select: {
               id: true,
@@ -201,7 +173,7 @@ export class RegistroEntrevistaService extends BaseService<RegistroEntrevista, s
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  override async delete(id: string): Promise<boolean> {
     try {
       const existing = await prisma.registroEntrevista.findUnique({
         where: { id },

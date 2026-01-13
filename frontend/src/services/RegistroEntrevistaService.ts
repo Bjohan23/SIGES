@@ -5,7 +5,6 @@ import apiClient from '@/lib/api'
 
 export interface RegistroEntrevista {
   id: string
-  estudiante_id?: string
   lugar?: string
   fecha?: string
   hora?: string
@@ -18,13 +17,6 @@ export interface RegistroEntrevista {
   updated_by?: string
   created_at: string
   updated_at: string
-  estudiante?: {
-    id: string
-    codigo: string
-    nombres: string
-    apellido_paterno: string
-    apellido_materno: string
-  }
   creador?: {
     id: string
     nombres: string
@@ -33,7 +25,6 @@ export interface RegistroEntrevista {
 }
 
 export interface CreateRegistroEntrevistaData {
-  estudiante_id?: string
   lugar?: string
   fecha?: string
   hora?: string
@@ -63,12 +54,17 @@ export class RegistroEntrevistaService {
   static async getRegistrosEntrevistas(
     params?: { page?: number; limit?: number; estudiante_id?: string; search?: string }
   ): Promise<RegistrosEntrevistasResponse> {
-    const response = await apiClient.get<RegistrosEntrevistasResponse>('/api/v1/registros-entrevistas', {
+    // The API returns { success: true, data: [...], pagination: {...}, timestamp: "..." }
+    const response = await apiClient.get<RegistroEntrevista[]>('/api/v1/registros-entrevistas', {
       params,
-    })
+    }) as any
 
     if (response.success && response.data) {
-      return response.data
+      // Extract data and pagination from the response
+      return {
+        data: response.data,
+        pagination: response.pagination,
+      }
     }
 
     // Si la respuesta es exitosa pero no tiene datos, devolver estructura vacía

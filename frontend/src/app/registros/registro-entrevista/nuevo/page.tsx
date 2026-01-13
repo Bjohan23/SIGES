@@ -7,7 +7,6 @@ import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Navbar from '@/components/Navbar'
-import StudentSelector from '@/components/ui/StudentSelector'
 import ErrorAlert from '@/components/ErrorAlert'
 import SuccessAlert from '@/components/SuccessAlert'
 import { RegistroEntrevistaService, CreateRegistroEntrevistaData } from '@/services/RegistroEntrevistaService'
@@ -16,7 +15,6 @@ export default function NuevoRegistroEntrevistaPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
 
-  const [estudianteId, setEstudianteId] = useState('')
   const [lugar, setLugar] = useState('')
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
   const [hora, setHora] = useState('')
@@ -50,7 +48,6 @@ export default function NuevoRegistroEntrevistaPage() {
       setLoading(true)
 
       const data: CreateRegistroEntrevistaData = {
-        estudiante_id: estudianteId || undefined,
         lugar: lugar.trim() || undefined,
         fecha: fecha || undefined,
         hora: hora.trim() || undefined,
@@ -119,18 +116,6 @@ export default function NuevoRegistroEntrevistaPage() {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Selección de estudiante */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
-              Estudiante
-            </h3>
-            <StudentSelector
-              value={estudianteId}
-              onChange={setEstudianteId}
-              placeholder="Seleccionar estudiante (opcional)"
-            />
-          </div>
-
           {/* Datos de la entrevista */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
