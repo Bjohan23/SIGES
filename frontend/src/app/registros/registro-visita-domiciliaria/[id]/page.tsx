@@ -1,7 +1,7 @@
 'use client'
 
-// app/registros/registro-entrevista/[id]/page.tsx
-// Página de detalles de Registro de Entrevista
+// app/registros/registro-visita-domiciliaria/[id]/page.tsx
+// Página de detalles de Registro de Visita Domiciliaria
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
@@ -9,15 +9,15 @@ import { useAuth } from '@/context/AuthContext'
 import Navbar from '@/components/Navbar'
 import ErrorAlert from '@/components/ErrorAlert'
 import SuccessAlert from '@/components/SuccessAlert'
-import { RegistroEntrevistaService } from '@/services/RegistroEntrevistaService'
-import type { RegistroEntrevista } from '@/services/RegistroEntrevistaService'
+import { RegistroVisitaDomiciliariaService } from '@/services/RegistroVisitaDomiciliariaService'
+import type { RegistroVisitaDomiciliaria } from '@/services/RegistroVisitaDomiciliariaService'
 
-export default function RegistroEntrevistaDetallePage() {
+export default function RegistroVisitaDomiciliariaDetallePage() {
   const router = useRouter()
   const params = useParams()
   const { user, loading: authLoading } = useAuth()
 
-  const [registro, setRegistro] = useState<RegistroEntrevista | null>(null)
+  const [registro, setRegistro] = useState<RegistroVisitaDomiciliaria | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -37,10 +37,10 @@ export default function RegistroEntrevistaDetallePage() {
   const loadRegistro = async (id: string) => {
     try {
       setLoading(true)
-      const data = await RegistroEntrevistaService.getRegistroEntrevistaById(id)
+      const data = await RegistroVisitaDomiciliariaService.getRegistroVisitaDomiciliariaById(id)
       setRegistro(data)
     } catch (err: any) {
-      setError(err.message || 'Error al cargar el registro de entrevista')
+      setError(err.message || 'Error al cargar el registro de visita domiciliaria')
     } finally {
       setLoading(false)
     }
@@ -49,15 +49,15 @@ export default function RegistroEntrevistaDetallePage() {
   const handleDelete = async () => {
     if (!registro) return
 
-    if (confirm('¿Está seguro de que desea eliminar este registro de entrevista?')) {
+    if (confirm('¿Está seguro de que desea eliminar este registro de visita domiciliaria?')) {
       try {
-        await RegistroEntrevistaService.deleteRegistroEntrevista(registro.id)
-        setSuccess('Registro de entrevista eliminado exitosamente')
+        await RegistroVisitaDomiciliariaService.deleteRegistroVisitaDomiciliaria(registro.id)
+        setSuccess('Registro de visita domiciliaria eliminado exitosamente')
         setTimeout(() => {
-          router.push('/registros/registro-entrevista')
+          router.push('/registros/registro-visita-domiciliaria')
         }, 1500)
       } catch (err: any) {
-        setError(err.message || 'Error al eliminar el registro de entrevista')
+        setError(err.message || 'Error al eliminar el registro de visita domiciliaria')
       }
     }
   }
@@ -79,7 +79,7 @@ export default function RegistroEntrevistaDetallePage() {
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Registro de Entrevista - ${registro.tema || 'N/A'}</title>
+          <title>Registro de Visita Domiciliaria - ${registro.nombre_entrevistado || 'N/A'}</title>
           <style>
             /* Reset and base styles */
             * {
@@ -149,10 +149,6 @@ export default function RegistroEntrevistaDetallePage() {
               margin-bottom: 10px;
             }
 
-            .data-grid.full-width {
-              grid-template-columns: 1fr;
-            }
-
             .field {
               display: flex;
               gap: 4px;
@@ -170,13 +166,6 @@ export default function RegistroEntrevistaDetallePage() {
               font-size: 10pt;
               color: #000;
               flex: 1;
-            }
-
-            /* Divider line between fields */
-            .divider {
-              grid-column: 1 / -1;
-              border-top: 1px solid #000;
-              margin: 8px 0;
             }
 
             /* Relato section with border */
@@ -260,48 +249,43 @@ export default function RegistroEntrevistaDetallePage() {
           <div class="top-border"></div>
 
           <div class="header">
-            <h1>REGISTRO DE ENTREVISTA</h1>
+            <h1>REGISTRO DE VISITA DOMICILIARIA</h1>
             <p>Fecha de emisión: ${formatDate(registro.created_at)}</p>
           </div>
 
           <div class="section">
-            <h3>DATOS DE LA ENTREVISTA</h3>
+            <h3>I. DATOS GENERALES</h3>
             <div class="data-grid">
               <div class="field">
-                <span class="field-label">Lugar:</span>
-                <span class="field-value">${registro.lugar || 'N/A'}</span>
+                <span class="field-label">Nombre:</span>
+                <span class="field-value">${registro.nombre_entrevistado || 'N/A'}</span>
               </div>
               <div class="field">
-                <span class="field-label">Fecha:</span>
-                <span class="field-value">${registro.fecha ? formatDate(registro.fecha) : 'N/A'}</span>
+                <span class="field-label">Domicilio:</span>
+                <span class="field-value">${registro.domicilio || 'N/A'}</span>
               </div>
               <div class="field">
-                <span class="field-label">Hora:</span>
-                <span class="field-value">${registro.hora || 'N/A'}</span>
+                <span class="field-label">Fecha Visita:</span>
+                <span class="field-value">${registro.fecha_visita ? formatDate(registro.fecha_visita) : 'N/A'}</span>
               </div>
               <div class="field">
-                <span class="field-label">Tema:</span>
-                <span class="field-value">${registro.tema || 'N/A'}</span>
-              </div>
-              <div class="field">
-                <span class="field-label">Objetivo:</span>
-                <span class="field-value">${registro.objetivo || 'N/A'}</span>
-              </div>
-              <div class="field">
-                <span class="field-label">Entrevistado:</span>
-                <span class="field-value">${registro.entrevistado || 'N/A'}</span>
-              </div>
-              <div class="field">
-                <span class="field-label">Entrevistador:</span>
-                <span class="field-value">${registro.entrevistador || 'N/A'}</span>
+                <span class="field-label">Responsable:</span>
+                <span class="field-value">${registro.responsable || 'N/A'}</span>
               </div>
             </div>
           </div>
 
           <div class="section">
-            <h3>DESCRIPCIÓN Y RELATO</h3>
+            <h3>II. OBJETIVO</h3>
             <div class="relato-box">
-              <div class="relato-content">${registro.descripcion_relato || 'Sin información'}</div>
+              <div class="relato-content">${registro.objetivo || 'Sin información'}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>III. RELATO</h3>
+            <div class="relato-box">
+              <div class="relato-content">${registro.relato || 'Sin información'}</div>
             </div>
           </div>
 
@@ -309,7 +293,7 @@ export default function RegistroEntrevistaDetallePage() {
             <div class="signature-grid">
               <div class="signature-item">
                 <div class="signature-space"></div>
-                <div class="signature-label">ENTREVISTADOR</div>
+                <div class="signature-label">RESPONSABLE</div>
               </div>
               <div class="signature-item">
                 <div class="signature-space"></div>
@@ -369,7 +353,7 @@ export default function RegistroEntrevistaDetallePage() {
           <ErrorAlert message={error} />
           <button
             type="button"
-            onClick={() => router.push('/registros/registro-entrevista')}
+            onClick={() => router.push('/registros/registro-visita-domiciliaria')}
             className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
             Volver a la lista
@@ -389,13 +373,13 @@ export default function RegistroEntrevistaDetallePage() {
           <div>
             <button
               type="button"
-              onClick={() => router.push('/registros/registro-entrevista')}
+              onClick={() => router.push('/registros/registro-visita-domiciliaria')}
               className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 mb-2"
             >
               ← Volver a la lista
             </button>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Detalle del Registro de Entrevista
+              Detalle del Registro de Visita Domiciliaria
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Información completa del registro
@@ -411,7 +395,7 @@ export default function RegistroEntrevistaDetallePage() {
             </button>
             <button
               type="button"
-              onClick={() => router.push(`/registros/registro-entrevista/${registro?.id}/editar`)}
+              onClick={() => router.push(`/registros/registro-visita-domiciliaria/${registro?.id}/editar`)}
               className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition"
             >
               Editar
@@ -442,52 +426,50 @@ export default function RegistroEntrevistaDetallePage() {
 
         {registro && (
           <div className="space-y-6">
-            {/* Datos de la entrevista */}
+            {/* I. Datos Generales */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
-                Datos de la Entrevista
+                I. DATOS GENERALES
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Lugar:</span>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.lugar || 'N/A'}</p>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Nombre del Entrevistado:</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.nombre_entrevistado || 'N/A'}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Fecha:</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Domicilio:</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.domicilio || 'N/A'}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Fecha de Visita:</span>
                   <p className="font-medium text-gray-900 dark:text-gray-100">
-                    {registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-ES') : 'N/A'}
+                    {registro.fecha_visita ? new Date(registro.fecha_visita).toLocaleDateString('es-ES') : 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Hora:</span>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.hora || 'N/A'}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Tema:</span>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.tema || 'N/A'}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Objetivo:</span>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.objetivo || 'N/A'}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Entrevistado:</span>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.entrevistado || 'N/A'}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Entrevistador:</span>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.entrevistador || 'N/A'}</p>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Responsable:</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{registro.responsable || 'N/A'}</p>
                 </div>
               </div>
             </div>
 
-            {/* Descripción y Relato */}
+            {/* II. Objetivo */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
-                Descripción y Relato
+                II. OBJETIVO
               </h3>
               <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg whitespace-pre-wrap">
-                {registro.descripcion_relato || 'Sin información'}
+                {registro.objetivo || 'Sin información'}
+              </p>
+            </div>
+
+            {/* III. Relato */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
+                III. RELATO
+              </h3>
+              <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg whitespace-pre-wrap">
+                {registro.relato || 'Sin información'}
               </p>
             </div>
 

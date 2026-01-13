@@ -363,8 +363,6 @@ model RegistroVisitaDomiciliaria {
   // III. Relato
   relato               String?             @db.Text
 
-  estado               EstadoRegistro      @default(BORRADOR)
-
   created_by           String?
   updated_by           String?
   created_at           DateTime            @default(now())
@@ -376,7 +374,6 @@ model RegistroVisitaDomiciliaria {
 
   @@index([estudiante_id])
   @@index([fecha_visita])
-  @@index([estado])
   @@map("registros_visitas_domiciliarias")
 }
 

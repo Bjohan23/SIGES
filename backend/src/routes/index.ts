@@ -8,6 +8,7 @@ import estudiantesRoutes from './estudiantes.routes';
 import entrevistasRoutes from './entrevistas.routes';
 import informesSocialesRoutes from './informes-sociales.routes';
 import registrosEntrevistasRoutes from './registros-entrevistas.routes';
+import registrosVisitasDomiciliariasRoutes from './registros-visitas-domiciliarias.routes';
 import { generalRateLimit } from '@/middleware/rateLimit';
 import { authenticateToken } from '@/middleware/auth';
 import { serveImage } from '@/middleware/imageHandler';
@@ -59,6 +60,7 @@ router.use('/api/v1/estudiantes', estudiantesRoutes);
 router.use('/api/v1/entrevistas', entrevistasRoutes);
 router.use('/api/v1/informes-sociales', informesSocialesRoutes);
 router.use('/api/v1/registros-entrevistas', registrosEntrevistasRoutes);
+router.use('/api/v1/registros-visitas-domiciliarias', registrosVisitasDomiciliariasRoutes);
 // router.use('/api/v1/usuarios', usuariosRoutes);
 // router.use('/api/v1/roles', rolesRoutes);
 

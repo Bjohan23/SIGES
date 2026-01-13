@@ -1,22 +1,22 @@
 'use client'
 
-// app/registros/registro-entrevista/page.tsx
-// Página de listado de Registros de Entrevista
+// app/registros/registro-visita-domiciliaria/page.tsx
+// Página de listado de Registros de Visita Domiciliaria
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Navbar from '@/components/Navbar'
-import { RegistroEntrevistaService } from '@/services/RegistroEntrevistaService'
-import type { RegistroEntrevista } from '@/services/RegistroEntrevistaService'
+import { RegistroVisitaDomiciliariaService } from '@/services/RegistroVisitaDomiciliariaService'
+import type { RegistroVisitaDomiciliaria } from '@/services/RegistroVisitaDomiciliariaService'
 import ErrorAlert from '@/components/ErrorAlert'
 import SuccessAlert from '@/components/SuccessAlert'
 
-export default function RegistrosEntrevistaPage() {
+export default function RegistrosVisitaDomiciliariaPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
 
-  const [registros, setRegistros] = useState<RegistroEntrevista[]>([])
+  const [registros, setRegistros] = useState<RegistroVisitaDomiciliaria[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -42,10 +42,10 @@ export default function RegistrosEntrevistaPage() {
       const filtros: any = {}
       if (searchTerm) filtros.search = searchTerm
 
-      const response = await RegistroEntrevistaService.getRegistrosEntrevistas(filtros)
+      const response = await RegistroVisitaDomiciliariaService.getRegistrosVisitasDomiciliarias(filtros)
       setRegistros(response?.data || [])
     } catch (err: any) {
-      setError(err.message || 'Error al cargar los registros de entrevista')
+      setError(err.message || 'Error al cargar los registros de visita domiciliaria')
       setRegistros([])
     } finally {
       setLoading(false)
@@ -53,21 +53,21 @@ export default function RegistrosEntrevistaPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Está seguro de que desea eliminar este registro de entrevista?')) {
+    if (!confirm('¿Está seguro de que desea eliminar este registro de visita domiciliaria?')) {
       return
     }
 
     try {
-      await RegistroEntrevistaService.deleteRegistroEntrevista(id)
-      setSuccess('Registro de entrevista eliminado exitosamente')
+      await RegistroVisitaDomiciliariaService.deleteRegistroVisitaDomiciliaria(id)
+      setSuccess('Registro de visita domiciliaria eliminado exitosamente')
       loadRegistros()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
-      setError(err.message || 'Error al eliminar el registro de entrevista')
+      setError(err.message || 'Error al eliminar el registro de visita domiciliaria')
     }
   }
 
-  const handlePrintPDF = async (registro: RegistroEntrevista) => {
+  const handlePrintPDF = async (registro: RegistroVisitaDomiciliaria) => {
     try {
       const content = generatePDFContent(registro)
 
@@ -77,7 +77,7 @@ export default function RegistrosEntrevistaPage() {
           <!DOCTYPE html>
           <html>
           <head>
-            <title>Registro de Entrevista - ${registro.tema || 'N/A'}</title>
+            <title>Registro de Visita Domiciliaria - ${registro.nombre_entrevistado || 'N/A'}</title>
             <style>
               /* Reset and base styles */
               * {
@@ -168,13 +168,6 @@ export default function RegistrosEntrevistaPage() {
                 font-size: 10pt;
                 color: #000;
                 flex: 1;
-              }
-
-              /* Divider line between fields */
-              .divider {
-                grid-column: 1 / -1;
-                border-top: 1px solid #000;
-                margin: 8px 0;
               }
 
               /* Relato section with border */
@@ -275,7 +268,7 @@ export default function RegistrosEntrevistaPage() {
     }
   }
 
-  const generatePDFContent = (registro: RegistroEntrevista): string => {
+  const generatePDFContent = (registro: RegistroVisitaDomiciliaria): string => {
     const formatDate = (dateStr: string) => {
       if (!dateStr) return 'N/A'
       return new Date(dateStr).toLocaleDateString('es-ES', {
@@ -287,48 +280,43 @@ export default function RegistrosEntrevistaPage() {
 
     return `
       <div class="header">
-        <h1>REGISTRO DE ENTREVISTA</h1>
+        <h1>REGISTRO DE VISITA DOMICILIARIA</h1>
         <p>Fecha de emisión: ${formatDate(registro.created_at)}</p>
       </div>
 
       <div class="section">
-        <h3>DATOS DE LA ENTREVISTA</h3>
+        <h3>I. DATOS GENERALES</h3>
         <div class="data-grid">
           <div class="field">
-            <span class="field-label">Lugar:</span>
-            <span class="field-value">${registro.lugar || 'N/A'}</span>
+            <span class="field-label">Nombre:</span>
+            <span class="field-value">${registro.nombre_entrevistado || 'N/A'}</span>
           </div>
           <div class="field">
-            <span class="field-label">Fecha:</span>
-            <span class="field-value">${registro.fecha ? formatDate(registro.fecha) : 'N/A'}</span>
+            <span class="field-label">Domicilio:</span>
+            <span class="field-value">${registro.domicilio || 'N/A'}</span>
           </div>
           <div class="field">
-            <span class="field-label">Hora:</span>
-            <span class="field-value">${registro.hora || 'N/A'}</span>
+            <span class="field-label">Fecha Visita:</span>
+            <span class="field-value">${registro.fecha_visita ? formatDate(registro.fecha_visita) : 'N/A'}</span>
           </div>
           <div class="field">
-            <span class="field-label">Tema:</span>
-            <span class="field-value">${registro.tema || 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Objetivo:</span>
-            <span class="field-value">${registro.objetivo || 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Entrevistado:</span>
-            <span class="field-value">${registro.entrevistado || 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Entrevistador:</span>
-            <span class="field-value">${registro.entrevistador || 'N/A'}</span>
+            <span class="field-label">Responsable:</span>
+            <span class="field-value">${registro.responsable || 'N/A'}</span>
           </div>
         </div>
       </div>
 
       <div class="section">
-        <h3>DESCRIPCIÓN Y RELATO</h3>
+        <h3>II. OBJETIVO</h3>
         <div class="relato-box">
-          <div class="relato-content">${registro.descripcion_relato || 'Sin información'}</div>
+          <div class="relato-content">${registro.objetivo || 'Sin información'}</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>III. RELATO</h3>
+        <div class="relato-box">
+          <div class="relato-content">${registro.relato || 'Sin información'}</div>
         </div>
       </div>
 
@@ -336,7 +324,7 @@ export default function RegistrosEntrevistaPage() {
         <div class="signature-grid">
           <div class="signature-item">
             <div class="signature-space"></div>
-            <div class="signature-label">ENTREVISTADOR</div>
+            <div class="signature-label">RESPONSABLE</div>
           </div>
           <div class="signature-item">
             <div class="signature-space"></div>
@@ -371,15 +359,15 @@ export default function RegistrosEntrevistaPage() {
               ← Volver a Registros
             </button>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Registros de Entrevista
+              Registros de Visita Domiciliaria
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Gestión de registros de entrevista con guía adjunta
+              Gestión de registros de visita domiciliaria
             </p>
           </div>
           <button
             type="button"
-            onClick={() => router.push('/registros/registro-entrevista/nuevo')}
+            onClick={() => router.push('/registros/registro-visita-domiciliaria/nuevo')}
             className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition"
           >
             + Nuevo Registro
@@ -412,7 +400,7 @@ export default function RegistrosEntrevistaPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && loadRegistros()}
-                placeholder="Tema, entrevistado..."
+                placeholder="Nombre, domicilio..."
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -442,13 +430,13 @@ export default function RegistrosEntrevistaPage() {
                   <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Tema
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Entrevistado
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Fecha
+                        Domicilio
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Fecha Visita
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Acciones
@@ -459,7 +447,7 @@ export default function RegistrosEntrevistaPage() {
                     {registros.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                          No se encontraron registros de entrevista
+                          No se encontraron registros de visita domiciliaria
                         </td>
                       </tr>
                     ) : (
@@ -467,28 +455,28 @@ export default function RegistrosEntrevistaPage() {
                         <tr key={registro.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                           <td className="px-6 py-4">
                             <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {registro.tema || 'Sin tema'}
+                              {registro.nombre_entrevistado || 'Sin nombre'}
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {registro.entrevistado || 'N/A'}
+                              {registro.domicilio || 'N/A'}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-ES') : 'N/A'}
+                            {registro.fecha_visita ? new Date(registro.fecha_visita).toLocaleDateString('es-ES') : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button
                               type="button"
-                              onClick={() => router.push(`/registros/registro-entrevista/${registro.id}`)}
+                              onClick={() => router.push(`/registros/registro-visita-domiciliaria/${registro.id}`)}
                               className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-3"
                             >
                               Ver
                             </button>
                             <button
                               type="button"
-                              onClick={() => router.push(`/registros/registro-entrevista/${registro.id}/editar`)}
+                              onClick={() => router.push(`/registros/registro-visita-domiciliaria/${registro.id}/editar`)}
                               className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 mr-3"
                             >
                               Editar
