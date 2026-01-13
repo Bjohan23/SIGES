@@ -10,6 +10,8 @@ import informesSocialesRoutes from './informes-sociales.routes';
 import registrosEntrevistasRoutes from './registros-entrevistas.routes';
 import registrosVisitasDomiciliariasRoutes from './registros-visitas-domiciliarias.routes';
 import informesVisitasDomiciliariasRoutes from './informes-visitas-domiciliarias.routes';
+import cronicasCasosSocialesRoutes from './cronicas-casos-sociales.routes';
+import situacionesSocioFamiliaresRoutes from './situaciones-socio-familiares.routes';
 import { generalRateLimit } from '@/middleware/rateLimit';
 import { authenticateToken } from '@/middleware/auth';
 import { serveImage } from '@/middleware/imageHandler';
@@ -63,6 +65,8 @@ router.use('/api/v1/informes-sociales', informesSocialesRoutes);
 router.use('/api/v1/registros-entrevistas', registrosEntrevistasRoutes);
 router.use('/api/v1/registros-visitas-domiciliarias', registrosVisitasDomiciliariasRoutes);
 router.use('/api/v1/informes-visitas-domiciliarias', informesVisitasDomiciliariasRoutes);
+router.use('/api/v1/cronicas-casos-sociales', cronicasCasosSocialesRoutes);
+router.use('/api/v1/situaciones-socio-familiares', situacionesSocioFamiliaresRoutes);
 // router.use('/api/v1/usuarios', usuariosRoutes);
 // router.use('/api/v1/roles', rolesRoutes);
 

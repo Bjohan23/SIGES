@@ -474,8 +474,6 @@ model SituacionSocioFamiliar {
   // PAUTAS DE VIDA FAMILIAR
   pautas_vida_familiar String?             @db.Text
 
-  estado               EstadoRegistro      @default(BORRADOR)
-
   created_by           String?
   updated_by           String?
   created_at           DateTime            @default(now())
@@ -486,7 +484,6 @@ model SituacionSocioFamiliar {
   actualizador         Usuario?            @relation("SituacionSocioFamiliarActualizador", fields: [updated_by], references: [id])
 
   @@index([estudiante_id])
-  @@index([estado])
   @@index([created_at])
   @@map("situaciones_socio_familiares")
 }
