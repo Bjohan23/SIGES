@@ -1,33 +1,32 @@
 'use client'
 
-// app/entrevistas/nuevo/page.tsx
-// Página para crear nueva Entrevista con el formulario completo
+// app/entrevistas/[id]/editar/page.tsx
+// Página para editar Entrevista
 
 import { useState, useEffect, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
-import { useEntrevistas } from '@/hooks/useEntrevistas'
-import StudentSelector from '@/components/ui/StudentSelector'
 import Navbar from '@/components/Navbar'
 import ErrorAlert from '@/components/ErrorAlert'
 import SuccessAlert from '@/components/SuccessAlert'
-import type { Estudiante } from '@/types'
+import { EntrevistaService } from '@/services/EntrevistaService'
+import type { EntrevistaAplicada } from '@/types'
 
-export default function NuevaEntrevistaPage() {
+export default function EditarEntrevistaPage() {
   const router = useRouter()
+  const params = useParams()
   const { user, loading: authLoading } = useAuth()
-  const { createEntrevista } = useEntrevistas()
 
-  const [loading, setLoading] = useState(false)
+  const [entrevista, setEntrevista] = useState<EntrevistaAplicada | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-
-  // Estudiante seleccionado
-  const [selectedStudent, setSelectedStudent] = useState<Estudiante | null>(null)
 
   // Datos adicionales del estudiante
   const [aula, setAula] = useState('')
   const [grado, setGrado] = useState('')
+  const [estado, setEstado] = useState('')
 
   // Respuestas de la entrevista
   const [pregunta1, setPregunta1] = useState('')
@@ -48,16 +47,41 @@ export default function NuevaEntrevistaPage() {
     }
   }, [user, authLoading, router])
 
-  const calculateAge = (fechaNacimiento: string | null) => {
-    if (!fechaNacimiento) return null
-    const today = new Date()
-    const birthDate = new Date(fechaNacimiento)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
+  useEffect(() => {
+    if (params.id && user) {
+      loadEntrevista(params.id as string)
     }
-    return age
+  }, [params.id, user])
+
+  const loadEntrevista = async (id: string) => {
+    try {
+      setLoading(true)
+      const data = await EntrevistaService.getEntrevistaById(id)
+      setEntrevista(data)
+
+      // Cargar datos en el formulario
+      setAula(data.aula || '')
+      setGrado(data.grado || '')
+      setEstado(data.estado || 'INCOMPLETA')
+
+      if (data.respuestas) {
+        setPregunta1(data.respuestas.pregunta_1 || '')
+        setPregunta2Opcion(data.respuestas.pregunta_2_opcion || '')
+        setPregunta2Porque(data.respuestas.pregunta_2_porque || '')
+        setPregunta3(data.respuestas.pregunta_3 || '')
+        setPregunta4(data.respuestas.pregunta_4 || '')
+        setPregunta5(data.respuestas.pregunta_5 || '')
+        setPregunta6(data.respuestas.pregunta_6 || '')
+        setPregunta7(data.respuestas.pregunta_7 || '')
+        setPregunta8(data.respuestas.pregunta_8 || '')
+        setPregunta9(data.respuestas.pregunta_9 || '')
+        setPregunta10(data.respuestas.pregunta_10 || '')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar la entrevista')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -65,22 +89,10 @@ export default function NuevaEntrevistaPage() {
     setError('')
     setSuccess('')
 
-    // Validaciones
-    if (!selectedStudent) {
-      setError('Por favor, seleccione un estudiante')
-      return
-    }
-    if (!grado.trim()) {
-      setError('El grado es obligatorio')
-      return
-    }
-    if (!aula.trim()) {
-      setError('El aula es obligatoria')
-      return
-    }
+    if (!entrevista) return
 
     try {
-      setLoading(true)
+      setSaving(true)
 
       const respuestas = {
         pregunta_1: pregunta1,
@@ -103,35 +115,30 @@ export default function NuevaEntrevistaPage() {
       ).length
       const porcentaje = Math.round((camposCompletados / totalCampos) * 100)
 
-      // Determinar estado basado en el porcentaje
-      let estado = 'INCOMPLETA'
+      // Determinar estado
+      let nuevoEstado = estado
       if (porcentaje === 100) {
-        estado = 'COMPLETA'
+        nuevoEstado = 'COMPLETA'
       } else if (porcentaje > 0) {
-        estado = 'EN_PROCESO'
+        nuevoEstado = 'EN_PROCESO'
       }
 
-      await createEntrevista({
-        estudiante_id: selectedStudent.id,
-        estudiante_nombres: selectedStudent.nombres,
-        estudiante_apellidos: `${selectedStudent.apellido_paterno} ${selectedStudent.apellido_materno}`,
-        estudiante_edad: calculateAge(selectedStudent.fecha_nacimiento) || undefined,
-        estudiante_fecha_nacimiento: selectedStudent.fecha_nacimiento || undefined,
+      await EntrevistaService.updateEntrevista(entrevista.id, {
         grado: grado.trim(),
         aula: aula.trim(),
         respuestas,
-        estado,
+        estado: nuevoEstado as any,
         porcentaje_completado: porcentaje,
       })
 
-      setSuccess('Entrevista creada exitosamente')
+      setSuccess('Entrevista actualizada exitosamente')
       setTimeout(() => {
-        router.push('/entrevistas')
+        router.push(`/entrevistas/${entrevista.id}`)
       }, 1500)
     } catch (err: any) {
-      setError(err.message || 'Error al crear la entrevista')
+      setError(err.message || 'Error al actualizar la entrevista')
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
@@ -143,6 +150,37 @@ export default function NuevaEntrevistaPage() {
     )
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+        <Navbar />
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (error && !entrevista) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+        <Navbar />
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ErrorAlert message={error} />
+          <button
+            type="button"
+            onClick={() => router.push('/entrevistas')}
+            className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          >
+            Volver a la lista
+          </button>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Navbar />
@@ -150,11 +188,18 @@ export default function NuevaEntrevistaPage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => router.push(`/entrevistas/${entrevista?.id}`)}
+            className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 mb-2"
+          >
+            ← Volver al detalle
+          </button>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Nueva Entrevista - Influencia Familiar y Educativa
+            Editar Entrevista - Influencia Familiar y Educativa
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Objetivo: Conocer relación familiar y educativa en los estudiantes de la I.E. N°11017 – Nicolas la Torre García
+            Estudiante: {entrevista?.estudiante_nombres} {entrevista?.estudiante_apellidos}
           </p>
         </div>
 
@@ -181,14 +226,6 @@ export default function NuevaEntrevistaPage() {
             </h3>
 
             <div className="space-y-4">
-              {/* Buscador de estudiantes */}
-              <StudentSelector
-                onStudentSelect={setSelectedStudent}
-                selectedStudent={selectedStudent}
-                label="Buscar Estudiante por Nombre o Apellido"
-                placeholder="Escribe para buscar..."
-              />
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Grado */}
                 <div>
@@ -395,7 +432,7 @@ export default function NuevaEntrevistaPage() {
             {/* Mensaje de agradecimiento */}
             <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center">
               <p className="text-green-800 dark:text-green-200 font-medium">
-                ¡MUCHAS GRACIAS POR SU PARTICIPACIÓN!
+                ¡GRACIAS POR ACTUALIZAR LA ENTREVISTA!
               </p>
             </div>
           </div>
@@ -404,17 +441,17 @@ export default function NuevaEntrevistaPage() {
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => router.push('/entrevistas')}
+              onClick={() => router.push(`/entrevistas/${entrevista?.id}`)}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={saving}
               className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Guardando...' : 'Guardar Entrevista'}
+              {saving ? 'Guardando...' : 'Guardar Cambios'}
             </button>
           </div>
         </form>

@@ -25,7 +25,8 @@ export default function EntrevistasTable({
   }>({ isOpen: false, entrevista: null })
 
   const getEstadoBadge = (estado: string) => {
-    return estado === 'completa'
+    const estadoLower = estado?.toLowerCase() || ''
+    return estadoLower === 'completa'
       ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
       : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
   }
