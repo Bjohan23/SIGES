@@ -5,6 +5,7 @@ import usersRoutes from './users.routes';
 import dashboardRoutes from './dashboard.routes';
 import fichasSocialesRoutes from './fichas-sociales.routes';
 import estudiantesRoutes from './estudiantes.routes';
+import entrevistasRoutes from './entrevistas.routes';
 import { generalRateLimit } from '@/middleware/rateLimit';
 import { authenticateToken } from '@/middleware/auth';
 import { serveImage } from '@/middleware/imageHandler';
@@ -53,7 +54,7 @@ router.use('/api/v1', authenticateToken, (req, res, next) => {
 // API routes
 router.use('/api/v1/fichas-sociales', fichasSocialesRoutes);
 router.use('/api/v1/estudiantes', estudiantesRoutes);
-// router.use('/api/v1/entrevistas', entrevistasRoutes);
+router.use('/api/v1/entrevistas', entrevistasRoutes);
 // router.use('/api/v1/usuarios', usuariosRoutes);
 // router.use('/api/v1/roles', rolesRoutes);
 

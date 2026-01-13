@@ -1,16 +1,16 @@
 'use client'
 
 // app/entrevistas/nuevo/page.tsx
-// Página para crear nueva Entrevista
+// Página para crear nueva Entrevista con el formulario completo
 
-import { useEffect, useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { useEntrevistas } from '@/hooks/useEntrevistas'
+import StudentSelector from '@/components/ui/StudentSelector'
 import Navbar from '@/components/Navbar'
-import Button from '@/components/Button'
-import InputField from '@/components/InputField'
 import ErrorAlert from '@/components/ErrorAlert'
+import type { Estudiante } from '@/types'
 
 export default function NuevaEntrevistaPage() {
   const router = useRouter()
@@ -20,13 +20,25 @@ export default function NuevaEntrevistaPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Datos del estudiante
-  const [estudianteApellidos, setEstudianteApellidos] = useState('')
-  const [estudianteNombres, setEstudianteNombres] = useState('')
-  const [estudianteEdad, setEstudianteEdad] = useState('')
-  const [estudianteFechaNacimiento, setEstudianteFechaNacimiento] = useState('')
-  const [grado, setGrado] = useState('')
+  // Estudiante seleccionado
+  const [selectedStudent, setSelectedStudent] = useState<Estudiante | null>(null)
+
+  // Datos adicionales del estudiante
   const [aula, setAula] = useState('')
+  const [grado, setGrado] = useState('')
+
+  // Respuestas de la entrevista
+  const [pregunta1, setPregunta1] = useState('')
+  const [pregunta2Opcion, setPregunta2Opcion] = useState('')
+  const [pregunta2Porque, setPregunta2Porque] = useState('')
+  const [pregunta3, setPregunta3] = useState('')
+  const [pregunta4, setPregunta4] = useState('')
+  const [pregunta5, setPregunta5] = useState('')
+  const [pregunta6, setPregunta6] = useState('')
+  const [pregunta7, setPregunta7] = useState('')
+  const [pregunta8, setPregunta8] = useState('')
+  const [pregunta9, setPregunta9] = useState('')
+  const [pregunta10, setPregunta10] = useState('')
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -34,22 +46,63 @@ export default function NuevaEntrevistaPage() {
     }
   }, [user, authLoading, router])
 
+  const calculateAge = (fechaNacimiento: string | null) => {
+    if (!fechaNacimiento) return null
+    const today = new Date()
+    const birthDate = new Date(fechaNacimiento)
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    return age
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
 
+    // Validaciones
+    if (!selectedStudent) {
+      setError('Por favor, seleccione un estudiante')
+      return
+    }
+    if (!grado.trim()) {
+      setError('El grado es obligatorio')
+      return
+    }
+    if (!aula.trim()) {
+      setError('El aula es obligatoria')
+      return
+    }
+
     try {
       setLoading(true)
 
+      const respuestas = {
+        pregunta_1: pregunta1,
+        pregunta_2_opcion: pregunta2Opcion,
+        pregunta_2_porque: pregunta2Porque,
+        pregunta_3: pregunta3,
+        pregunta_4: pregunta4,
+        pregunta_5: pregunta5,
+        pregunta_6: pregunta6,
+        pregunta_7: pregunta7,
+        pregunta_8: pregunta8,
+        pregunta_9: pregunta9,
+        pregunta_10: pregunta10,
+      }
+
       await createEntrevista({
-        estudiante_apellidos: estudianteApellidos,
-        estudiante_nombres: estudianteNombres,
-        estudiante_edad: parseInt(estudianteEdad),
-        estudiante_fecha_nacimiento: estudianteFechaNacimiento,
-        grado,
-        aula,
-        respuestas: {},
-        estado: 'incompleta',
+        estudiante_id: selectedStudent.id,
+        estudiante_nombres: selectedStudent.nombres,
+        estudiante_apellidos: `${selectedStudent.apellido_paterno} ${selectedStudent.apellido_materno}`,
+        estudiante_edad: calculateAge(selectedStudent.fecha_nacimiento) || undefined,
+        estudiante_fecha_nacimiento: selectedStudent.fecha_nacimiento || undefined,
+        grado: grado.trim(),
+        aula: aula.trim(),
+        respuestas,
+        estado: 'INCOMPLETA',
         porcentaje_completado: 10,
       })
 
@@ -64,138 +117,280 @@ export default function NuevaEntrevistaPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Nueva Entrevista
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Nueva Entrevista - Influencia Familiar y Educativa
           </h1>
-          <p className="text-gray-600 mt-1">
-            Registre los datos del estudiante para la entrevista socioemocional
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Objetivo: Conocer relación familiar y educativa en los estudiantes de la I.E. N°11017 – Nicolas la Torre García
           </p>
         </div>
 
+        {/* Error */}
         {error && (
           <div className="mb-6">
             <ErrorAlert message={error} />
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Datos del Estudiante */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
               Datos del Estudiante
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                id="estudianteApellidos"
-                label="Apellidos del Estudiante *"
-                type="text"
-                value={estudianteApellidos}
-                onChange={(e) => setEstudianteApellidos(e.target.value)}
-                placeholder="Apellidos completos"
-                required
+            <div className="space-y-4">
+              {/* Buscador de estudiantes */}
+              <StudentSelector
+                onStudentSelect={setSelectedStudent}
+                selectedStudent={selectedStudent}
+                label="Buscar Estudiante por Nombre o Apellido"
+                placeholder="Escribe para buscar..."
               />
 
-              <InputField
-                id="estudianteNombres"
-                label="Nombres del Estudiante *"
-                type="text"
-                value={estudianteNombres}
-                onChange={(e) => setEstudianteNombres(e.target.value)}
-                placeholder="Nombres completos"
-                required
-              />
-
-              <InputField
-                id="estudianteFechaNacimiento"
-                label="Fecha de Nacimiento *"
-                type="date"
-                value={estudianteFechaNacimiento}
-                onChange={(e) => setEstudianteFechaNacimiento(e.target.value)}
-                required
-              />
-
-              <InputField
-                id="estudianteEdad"
-                label="Edad *"
-                type="number"
-                value={estudianteEdad}
-                onChange={(e) => setEstudianteEdad(e.target.value)}
-                placeholder="Edad en años"
-                required
-              />
-
-              <InputField
-                id="grado"
-                label="Grado *"
-                type="text"
-                value={grado}
-                onChange={(e) => setGrado(e.target.value)}
-                placeholder="Ej: 5to Primaria"
-                required
-              />
-
-              <InputField
-                id="aula"
-                label="Aula *"
-                type="text"
-                value={aula}
-                onChange={(e) => setAula(e.target.value)}
-                placeholder="Ej: A, B, C"
-                required
-              />
-            </div>
-
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-6">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-yellow-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Grado */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Grado <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={grado}
+                    onChange={(e) => setGrado(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                    placeholder="Ej: 5to Primaria"
+                    required
+                  />
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm text-yellow-700">
-                    Esta es una versión simplificada del formulario. Los datos de
-                    la entrevista completa se pueden agregar posteriormente
-                    editando el registro.
-                  </p>
+
+                {/* Aula */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Aula <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={aula}
+                    onChange={(e) => setAula(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                    placeholder="Ej: A, B, C"
+                    required
+                  />
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-end space-x-4 pt-6 border-t">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => router.push('/entrevistas')}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? 'Guardando...' : 'Guardar Entrevista'}
-              </Button>
+          {/* Preguntas de la Entrevista */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
+              Preguntas de la Entrevista
+            </h3>
+
+            <div className="space-y-6">
+              {/* Pregunta 1 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  1. ¿Con quienes vives en casa?
+                </label>
+                <textarea
+                  value={pregunta1}
+                  onChange={(e) => setPregunta1(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Describe con quienes vives..."
+                />
+              </div>
+
+              {/* Pregunta 2 */}
+              <div>
+                <label htmlFor="pregunta2-opcion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  2. ¿Cómo es la relación con las personas con las que vives en casa?
+                </label>
+                <div className="space-y-3">
+                  <select
+                    id="pregunta2-opcion"
+                    value={pregunta2Opcion}
+                    onChange={(e) => setPregunta2Opcion(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">a) Muy buena</option>
+                    <option value="b">b) Buena</option>
+                    <option value="c">c) Regular</option>
+                    <option value="d">d) Mala</option>
+                    <option value="e">e) Muy mala</option>
+                  </select>
+                  <div>
+                    <label htmlFor="pregunta2-porque" className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      ¿Por qué?
+                    </label>
+                    <textarea
+                      id="pregunta2-porque"
+                      value={pregunta2Porque}
+                      onChange={(e) => setPregunta2Porque(e.target.value)}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                      placeholder="Explica por qué..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pregunta 3 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  3. ¿Con qué integrante de tu familia tiene más confianza para contarle cómo te sientes?
+                </label>
+                <textarea
+                  value={pregunta3}
+                  onChange={(e) => setPregunta3(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
+
+              {/* Pregunta 4 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  4. ¿Hay alguna persona en tu familia con la que te cueste trabajo hablar o compartir tus sentimientos?
+                </label>
+                <textarea
+                  value={pregunta4}
+                  onChange={(e) => setPregunta4(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
+
+              {/* Pregunta 5 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  5. ¿Sientes que el ambiente en el salón de clases es respetuoso y acogedor para todos?
+                </label>
+                <textarea
+                  value={pregunta5}
+                  onChange={(e) => setPregunta5(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
+
+              {/* Pregunta 6 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  6. ¿Hay algún lugar o momento durante la clase en el que te sientas incómodo?
+                </label>
+                <textarea
+                  value={pregunta6}
+                  onChange={(e) => setPregunta6(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
+
+              {/* Pregunta 7 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  7. ¿Hay algún compañero con el que se te haga difícil trabajar o llevarte bien?
+                </label>
+                <textarea
+                  value={pregunta7}
+                  onChange={(e) => setPregunta7(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
+
+              {/* Pregunta 8 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  8. ¿Qué es lo que más te gusta del grupo de amigos de tu salón?
+                </label>
+                <textarea
+                  value={pregunta8}
+                  onChange={(e) => setPregunta8(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
+
+              {/* Pregunta 9 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  9. Cuando trabajan en equipo, ¿sientes que todos colaboran y hacen su parte?
+                </label>
+                <textarea
+                  value={pregunta9}
+                  onChange={(e) => setPregunta9(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
+
+              {/* Pregunta 10 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  10. ¿Hay algún tema o actividad que te parezca confuso o difícil de entender?
+                </label>
+                <textarea
+                  value={pregunta10}
+                  onChange={(e) => setPregunta10(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Responde aquí..."
+                />
+              </div>
             </div>
-          </form>
-        </div>
+
+            {/* Mensaje de agradecimiento */}
+            <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center">
+              <p className="text-green-800 dark:text-green-200 font-medium">
+                ¡MUCHAS GRACIAS POR SU PARTICIPACIÓN!
+              </p>
+            </div>
+          </div>
+
+          {/* Botones */}
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push('/entrevistas')}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Guardando...' : 'Guardar Entrevista'}
+            </button>
+          </div>
+        </form>
       </main>
     </div>
   )
