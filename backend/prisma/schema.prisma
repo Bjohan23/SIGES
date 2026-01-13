@@ -332,8 +332,6 @@ model RegistroEntrevista {
   entrevistador        String?
   descripcion_relato   String?             @db.Text
 
-  estado               EstadoRegistro      @default(BORRADOR)
-
   created_by           String?
   updated_by           String?
   created_at           DateTime            @default(now())
@@ -345,7 +343,6 @@ model RegistroEntrevista {
 
   @@index([estudiante_id])
   @@index([fecha])
-  @@index([estado])
   @@map("registros_entrevistas")
 }
 

@@ -1,22 +1,22 @@
 'use client'
 
-// app/registros/informe-social/page.tsx
-// Página de listado de Informes Sociales
+// app/registros/registro-entrevista/page.tsx
+// Página de listado de Registros de Entrevista
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Navbar from '@/components/Navbar'
-import { InformeSocialService } from '@/services/InformeSocialService'
-import type { InformeSocial } from '@/services/InformeSocialService'
+import { RegistroEntrevistaService } from '@/services/RegistroEntrevistaService'
+import type { RegistroEntrevista } from '@/services/RegistroEntrevistaService'
 import ErrorAlert from '@/components/ErrorAlert'
 import SuccessAlert from '@/components/SuccessAlert'
 
-export default function InformesSocialesPage() {
+export default function RegistrosEntrevistaPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
 
-  const [informes, setInformes] = useState<InformeSocial[]>([])
+  const [registros, setRegistros] = useState<RegistroEntrevista[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -30,11 +30,11 @@ export default function InformesSocialesPage() {
 
   useEffect(() => {
     if (user) {
-      loadInformes()
+      loadRegistros()
     }
   }, [user])
 
-  const loadInformes = async () => {
+  const loadRegistros = async () => {
     try {
       setLoading(true)
       setError('')
@@ -42,44 +42,42 @@ export default function InformesSocialesPage() {
       const filtros: any = {}
       if (searchTerm) filtros.search = searchTerm
 
-      const response = await InformeSocialService.getInformesSociales(filtros)
-      setInformes(response?.data || [])
+      const response = await RegistroEntrevistaService.getRegistrosEntrevistas(filtros)
+      setRegistros(response?.data || [])
     } catch (err: any) {
-      setError(err.message || 'Error al cargar los informes sociales')
-      setInformes([])
+      setError(err.message || 'Error al cargar los registros de entrevista')
+      setRegistros([])
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Está seguro de que desea eliminar este informe social?')) {
+    if (!confirm('¿Está seguro de que desea eliminar este registro de entrevista?')) {
       return
     }
 
     try {
-      await InformeSocialService.deleteInformeSocial(id)
-      setSuccess('Informe social eliminado exitosamente')
-      loadInformes()
+      await RegistroEntrevistaService.deleteRegistroEntrevista(id)
+      setSuccess('Registro de entrevista eliminado exitosamente')
+      loadRegistros()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
-      setError(err.message || 'Error al eliminar el informe social')
+      setError(err.message || 'Error al eliminar el registro de entrevista')
     }
   }
 
-  const handlePrintPDF = async (informe: InformeSocial) => {
+  const handlePrintPDF = async (registro: RegistroEntrevista) => {
     try {
-      // Generar contenido HTML para el PDF
-      const content = generatePDFContent(informe)
+      const content = generatePDFContent(registro)
 
-      // Crear una nueva ventana para imprimir
       const printWindow = window.open('', '_blank')
       if (printWindow) {
         printWindow.document.write(`
           <!DOCTYPE html>
           <html>
           <head>
-            <title>Informe Social - ${informe.nombres_apellidos || 'N/A'}</title>
+            <title>Registro de Entrevista - ${registro.tema || 'N/A'}</title>
             <style>
               body {
                 font-family: Arial, sans-serif;
@@ -175,7 +173,6 @@ export default function InformesSocialesPage() {
           </html>
         `)
         printWindow.document.close()
-        // Esperar a que el contenido se cargue antes de imprimir
         setTimeout(() => {
           printWindow.focus()
           printWindow.print()
@@ -187,7 +184,7 @@ export default function InformesSocialesPage() {
     }
   }
 
-  const generatePDFContent = (informe: InformeSocial): string => {
+  const generatePDFContent = (registro: RegistroEntrevista): string => {
     const formatDate = (dateStr: string) => {
       if (!dateStr) return 'N/A'
       return new Date(dateStr).toLocaleDateString('es-ES', {
@@ -197,92 +194,68 @@ export default function InformesSocialesPage() {
       })
     }
 
+    const formatDateTime = (dateStr: string) => {
+      if (!dateStr) return 'N/A'
+      const date = new Date(dateStr)
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    }
+
     return `
       <div class="header">
-        <h1>INFORME SOCIAL</h1>
-        <p>Fecha de emisión: ${formatDate(informe.created_at)}</p>
+        <h1>REGISTRO DE ENTREVISTA</h1>
+        <p>Fecha de emisión: ${formatDate(registro.created_at)}</p>
       </div>
 
       <div class="section">
-        <h3>I. DATOS GENERALES</h3>
+        <h3>DATOS DE LA ENTREVISTA</h3>
         <div class="section-content">
-          <div class="field">
-            <span class="field-label">Nombres y Apellidos:</span>
-            <span class="field-value">${informe.nombres_apellidos || 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Edad:</span>
-            <span class="field-value">${informe.edad ? informe.edad + ' años' : 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Estado Civil:</span>
-            <span class="field-value">${informe.estado_civil || 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Grado de Instrucción:</span>
-            <span class="field-value">${informe.grado_instruccion || 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Dirección:</span>
-            <span class="field-value">${informe.direccion || 'N/A'}</span>
-          </div>
-          <div class="field">
-            <span class="field-label">Motivo:</span>
-            <span class="field-value">${informe.motivo || 'N/A'}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>II. SITUACIÓN FAMILIAR</h3>
-        <div class="text-content">${informe.situacion_familiar || 'Sin información'}</div>
-      </div>
-
-      <div class="section">
-        <h3>III. SITUACIÓN ECONÓMICA</h3>
-        <div class="text-content">${informe.situacion_economica || 'Sin información'}</div>
-      </div>
-
-      <div class="section">
-        <h3>IV. VIVIENDA</h3>
-        <div class="text-content">${informe.vivienda || 'Sin información'}</div>
-      </div>
-
-      <div class="section">
-        <h3>V. EDUCACIÓN</h3>
-        <div class="text-content">${informe.educacion || 'Sin información'}</div>
-      </div>
-
-      <div class="section">
-        <h3>VI. PROBLEMA SOCIAL</h3>
-        <div class="text-content">${informe.problema_social || 'Sin información'}</div>
-      </div>
-
-      <div class="section">
-        <h3>VII. APRECIACIÓN PROFESIONAL</h3>
-        <div class="section-content">
-          <div class="field">
-            <span class="field-label">Apreciación:</span>
-          </div>
-          <div class="text-content">${informe.apreciacion_profesional || 'N/A'}</div>
           <div class="field">
             <span class="field-label">Lugar:</span>
-            <span class="field-value">${informe.lugar || 'N/A'}</span>
+            <span class="field-value">${registro.lugar || 'N/A'}</span>
           </div>
           <div class="field">
             <span class="field-label">Fecha:</span>
-            <span class="field-value">${informe.fecha ? formatDate(informe.fecha) : 'N/A'}</span>
+            <span class="field-value">${registro.fecha ? formatDateTime(registro.fecha) : 'N/A'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Hora:</span>
+            <span class="field-value">${registro.hora || 'N/A'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Tema:</span>
+            <span class="field-value">${registro.tema || 'N/A'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Objetivo:</span>
+            <span class="field-value">${registro.objetivo || 'N/A'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Entrevistado:</span>
+            <span class="field-value">${registro.entrevistado || 'N/A'}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">Entrevistador:</span>
+            <span class="field-value">${registro.entrevistador || 'N/A'}</span>
           </div>
         </div>
+      </div>
+
+      <div class="section">
+        <h3>DESCRIPCIÓN Y RELATO</h3>
+        <div class="text-content">${registro.descripcion_relato || 'Sin información'}</div>
       </div>
 
       <div class="signature-section">
         <div class="signature-grid">
           <div>
-            <div class="signature-line">Trabajador(a) Social</div>
+            <div class="signature-line">Entrevistador</div>
           </div>
           <div>
-            <div class="signature-line">Firma del Beneficiario(a)</div>
+            <div class="signature-line">Entrevistado</div>
           </div>
         </div>
       </div>
@@ -317,18 +290,18 @@ export default function InformesSocialesPage() {
               ← Volver a Registros
             </button>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Informes Sociales
+              Registros de Entrevista
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Gestión de informes sociales de padres/tutores/apoderados
+              Gestión de registros de entrevista con guía adjunta
             </p>
           </div>
           <button
             type="button"
-            onClick={() => router.push('/registros/informe-social/nuevo')}
+            onClick={() => router.push('/registros/registro-entrevista/nuevo')}
             className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition"
           >
-            + Nuevo Informe
+            + Nuevo Registro
           </button>
         </div>
 
@@ -357,15 +330,15 @@ export default function InformesSocialesPage() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && loadInformes()}
-                placeholder="Nombre, apellido, motivo..."
+                onKeyDown={(e) => e.key === 'Enter' && loadRegistros()}
+                placeholder="Tema, entrevistado..."
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div className="flex items-end">
               <button
                 type="button"
-                onClick={loadInformes}
+                onClick={loadRegistros}
                 className="w-full px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition"
               >
                 Buscar
@@ -388,10 +361,10 @@ export default function InformesSocialesPage() {
                   <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Nombres y Apellidos
+                        Tema
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Motivo
+                        Entrevistado
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Fecha
@@ -402,53 +375,53 @@ export default function InformesSocialesPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {informes.length === 0 ? (
+                    {registros.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                          No se encontraron informes sociales
+                          No se encontraron registros de entrevista
                         </td>
                       </tr>
                     ) : (
-                      informes.map((informe) => (
-                        <tr key={informe.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                      registros.map((registro) => (
+                        <tr key={registro.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td className="px-6 py-4">
                             <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {informe.nombres_apellidos || 'N/A'}
+                              {registro.tema || 'Sin tema'}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                              {informe.motivo || 'Sin motivo'}
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {registro.entrevistado || 'N/A'}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {new Date(informe.created_at).toLocaleDateString('es-ES')}
+                            {registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-ES') : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button
                               type="button"
-                              onClick={() => router.push(`/registros/informe-social/${informe.id}`)}
+                              onClick={() => router.push(`/registros/registro-entrevista/${registro.id}`)}
                               className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-3"
                             >
                               Ver
                             </button>
                             <button
                               type="button"
-                              onClick={() => router.push(`/registros/informe-social/${informe.id}/editar`)}
+                              onClick={() => router.push(`/registros/registro-entrevista/${registro.id}/editar`)}
                               className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 mr-3"
                             >
                               Editar
                             </button>
                             <button
                               type="button"
-                              onClick={() => handlePrintPDF(informe)}
+                              onClick={() => handlePrintPDF(registro)}
                               className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 mr-3"
                             >
                               PDF
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleDelete(informe.id)}
+                              onClick={() => handleDelete(registro.id)}
                               className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                             >
                               Eliminar
@@ -464,7 +437,7 @@ export default function InformesSocialesPage() {
 
             {/* Contador */}
             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-              Total: {informes.length} informe{informes.length !== 1 ? 's' : ''}
+              Total: {registros.length} registro{registros.length !== 1 ? 's' : ''}
             </div>
           </>
         )}
