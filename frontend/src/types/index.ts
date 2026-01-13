@@ -180,28 +180,67 @@ export interface EntrevistaAplicada {
   updated_at: string
 }
 
-export interface FamiliaDisfuncional {
-  id: string
-  ficha_social_id: string
-  entrevista_id?: string
-  fecha_evaluacion: string
-  observaciones?: string
-  criterios_evaluacion?: string
-  indicadores?: any
-  requiere_seguimiento: boolean
-  seguimiento_activo: boolean
-  notas_seguimiento?: string
-  evaluado_por: string
-  created_at: string
-  updated_at: string
-}
-
 export interface Estadisticas {
   total_fichas: number
   fichas_completas: number
   fichas_pendientes: number
-  familias_disfuncionales: number
+  total_estudiantes: number
   total_entrevistas: number
   entrevistas_completas: number
   usuarios_activos: number
+}
+
+export interface Estudiante {
+  id: string
+  codigo: string
+  apellido_paterno: string
+  apellido_materno: string
+  nombres: string
+  fecha_nacimiento?: string
+  dni?: string
+  telefono?: string
+  email?: string
+  direccion?: string
+  activo: boolean
+  created_by?: string
+  updated_by?: string
+  created_at: string
+  updated_at: string
+  creador?: {
+    id: string
+    nombres: string
+    apellidos: string
+    email: string
+  }
+  actualizador?: {
+    id: string
+    nombres: string
+    apellidos: string
+    email: string
+  }
+}
+
+export interface CreateEstudianteData {
+  codigo: string
+  apellido_paterno: string
+  apellido_materno: string
+  nombres: string
+  fecha_nacimiento?: string
+  dni?: string
+  telefono?: string
+  email?: string
+  direccion?: string
+}
+
+export interface UpdateEstudianteData {
+  codigo?: string
+  apellido_paterno?: string
+  apellido_materno?: string
+  nombres?: string
+  fecha_nacimiento?: string
+  dni?: string
+  telefono?: string
+  email?: string
+  direccion?: string
+  activo?: boolean
 }

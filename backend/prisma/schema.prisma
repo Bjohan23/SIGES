@@ -80,6 +80,8 @@ model Usuario {
   fichas_sociales_actualizadas FichaSocial[]    @relation("FichaActualizador")
   entrevistas_creadas          EntrevistaAplicada[] @relation("EntrevistaCreador")
   entrevistas_actualizadas     EntrevistaAplicada[] @relation("EntrevistaActualizador")
+  estudiantes_creados          Estudiante[]       @relation("EstudianteCreador")
+  estudiantes_actualizados     Estudiante[]       @relation("EstudianteActualizador")
   auditorias                  Auditoria[]
 
   @@map("usuarios")
@@ -131,6 +133,7 @@ model RolModulo {
 // Ficha Social
 model FichaSocial {
   id                   String      @id @default(uuid())
+  estudiante_id        String?     // Nueva relación opcional con Estudiante
   apellidos            String
   nombres              String
   sexo                 Sexo?
@@ -161,6 +164,7 @@ model FichaSocial {
 
   creador              Usuario?            @relation("FichaCreador", fields: [created_by], references: [id])
   actualizador         Usuario?            @relation("FichaActualizador", fields: [updated_by], references: [id])
+  estudiante           Estudiante?         @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
   entrevistas          EntrevistaAplicada[]
 
   @@index([apellidos])
@@ -169,6 +173,7 @@ model FichaSocial {
   @@index([estado])
   @@index([distrito])
   @@index([created_at])
+  @@index([estudiante_id])  // Nuevo índice
   @@map("fichas_sociales")
 }
 
@@ -176,7 +181,8 @@ model FichaSocial {
 model EntrevistaAplicada {
   id                     String      @id @default(uuid())
   ficha_social_id        String?
-  estudiante_nombres     String
+  estudiante_id          String?     // Nueva relación opcional con Estudiante
+  estudiante_nombres     String      // Mantener por compatibilidad con datos existentes
   estudiante_apellidos   String
   estudiante_edad        Int?
   estudiante_fecha_nacimiento DateTime?
@@ -195,14 +201,48 @@ model EntrevistaAplicada {
   updated_at             DateTime    @updatedAt
 
   ficha_social           FichaSocial? @relation(fields: [ficha_social_id], references: [id], onDelete: SetNull)
+  estudiante             Estudiante?  @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
   creador                Usuario?     @relation("EntrevistaCreador", fields: [created_by], references: [id])
   actualizador           Usuario?     @relation("EntrevistaActualizador", fields: [updated_by], references: [id])
 
   @@index([estudiante_apellidos, estudiante_nombres])
   @@index([ficha_social_id])
+  @@index([estudiante_id])  // Nuevo índice
   @@index([estado])
   @@index([grado])
   @@index([created_at])
   @@map("entrevistas_aplicadas")
+}
+
+// Estudiante
+model Estudiante {
+  id                String    @id @default(uuid())
+  codigo            String    @unique
+  apellido_paterno  String
+  apellido_materno  String
+  nombres           String
+  fecha_nacimiento  DateTime?
+  dni               String?   @unique
+  telefono          String?
+  email             String?
+  direccion         String?
+  activo            Boolean   @default(true)
+
+  created_by        String?
+  updated_by        String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  creador           Usuario?               @relation("EstudianteCreador", fields: [created_by], references: [id])
+  actualizador      Usuario?               @relation("EstudianteActualizador", fields: [updated_by], references: [id])
+  entrevistas        EntrevistaAplicada[]   // Relación inversa con EntrevistaAplicada
+  fichas_sociales   FichaSocial[]          // Relación inversa con FichaSocial
+
+  @@index([codigo])
+  @@index([apellido_paterno, apellido_materno])
+  @@index([dni])
+  @@index([activo])
+  @@index([created_at])
+  @@map("estudiantes")
 }
 

@@ -19,7 +19,9 @@
       "Bash(powershell \"Stop-Process -Id 38280 -Force\")",
       "Bash(powershell \"Stop-Process -Id 18948 -Force\")",
       "Bash(npx prisma generate:*)",
-      "Bash(npx prisma studio:*)"
+      "Bash(npx prisma studio:*)",
+      "Bash(find:*)",
+      "Bash(npx prisma db execute:*)"
     ],
     "deny": [],
     "ask": []

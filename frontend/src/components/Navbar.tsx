@@ -39,9 +39,9 @@ export default function Navbar() {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Estudiantes', href: '/estudiantes' },
     { name: 'Fichas Sociales', href: '/fichas-sociales' },
     { name: 'Entrevistas', href: '/entrevistas' },
-    { name: 'Familias Disfuncionales', href: '/familias-disfuncionales' },
   ]
 
   const isActive = (href: string) => pathname === href

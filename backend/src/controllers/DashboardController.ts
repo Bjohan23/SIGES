@@ -19,6 +19,7 @@ export class DashboardController extends BaseController {
         totalUsuarios,
         totalFichasSociales,
         totalEntrevistas,
+        totalEstudiantes,
         fichasPorEstado,
         entrevistasPorEstado,
         usuariosPorRol
@@ -33,6 +34,11 @@ export class DashboardController extends BaseController {
 
         // Total entrevistas
         prisma.entrevistaAplicada.count(),
+
+        // Total estudiantes activos
+        prisma.estudiante.count({
+          where: { activo: true }
+        }),
 
         // Fichas por estado
         prisma.fichaSocial.groupBy({
@@ -53,6 +59,13 @@ export class DashboardController extends BaseController {
           where: { activo: true }
         })
       ]);
+
+      // Calculate completed and pending fichas
+      const fichasCompletas = fichasPorEstado.find(f => f.estado === 'COMPLETA')?._count || 0;
+      const fichasPendientes = fichasPorEstado.find(f => f.estado === 'INCOMPLETA')?._count || 0;
+
+      // Calculate completed entrevistas
+      const entrevistasCompletas = entrevistasPorEstado.find(e => e.estado === 'COMPLETA')?._count || 0;
 
       // Get role names for user counts
       const roles = await prisma.rol.findMany({
@@ -83,7 +96,8 @@ export class DashboardController extends BaseController {
       const [
         fichasRecientes,
         entrevistasRecientes,
-        usuariosRecientes
+        usuariosRecientes,
+        estudiantesRecientes
       ] = await Promise.all([
         prisma.fichaSocial.count({
           where: {
@@ -108,35 +122,27 @@ export class DashboardController extends BaseController {
             },
             activo: true
           }
+        }),
+
+        prisma.estudiante.count({
+          where: {
+            created_at: {
+              gte: sevenDaysAgo
+            },
+            activo: true
+          }
         })
       ]);
 
+      // Formato simplificado para el frontend
       const statistics = {
-        resumen: {
-          totalUsuarios,
-          totalFichasSociales,
-          totalEntrevistas,
-          actividadReciente: {
-            fichasNuevas: fichasRecientes,
-            entrevistasNuevas: entrevistasRecientes,
-            usuariosNuevos: usuariosRecientes
-          }
-        },
-        fichasSociales: {
-          totalPorEstado: fichasPorEstado.map(f => ({
-            estado: f.estado,
-            cantidad: f._count
-          }))
-        },
-        entrevistas: {
-          totalPorEstado: entrevistasPorEstado.map(e => ({
-            estado: e.estado,
-            cantidad: e._count
-          }))
-        },
-        usuarios: {
-          totalPorRol: usuariosPorRolConNombres
-        }
+        total_fichas: totalFichasSociales,
+        fichas_completas: fichasCompletas,
+        fichas_pendientes: fichasPendientes,
+        total_estudiantes: totalEstudiantes,
+        total_entrevistas: totalEntrevistas,
+        entrevistas_completas: entrevistasCompletas,
+        usuarios_activos: totalUsuarios,
       };
 
       this.success(res, statistics);

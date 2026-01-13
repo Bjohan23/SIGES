@@ -169,14 +169,39 @@ export class FichaSocialService {
     // Normalizar estado_civil a mayúsculas para compatibilidad con backend
     const estadoCivilNormalizado = fichaData.estado_civil?.toUpperCase()
 
-    const response = await apiClient.put<FichaSocial>(`/api/v1/fichas-sociales/${id}`, {
-      ...fichaData,
-      apellidos,
-      porcentaje_completado: porcentaje,
-      estado,
-      estado_civil: estadoCivilNormalizado, // Usar el valor normalizado
+    // Construir apellidos completo para el backend
+    const apellidosCompletos = `${fichaData.apellido_paterno || ''} ${fichaData.apellido_materno || ''}`.trim();
+
+    // Limpiar los datos para enviar solo los campos que el backend espera
+    const cleanedData: any = {
+      apellidos: apellidosCompletos,
+      nombres: fichaData.nombres,
+      sexo: fichaData.sexo,
+      fecha_nacimiento: fichaData.fecha_nacimiento,
+      nacionalidad: fichaData.nacionalidad,
+      dni: fichaData.dni,
+      carne_extranjeria: fichaData.carne_extranjeria,
+      nivel_educativo: fichaData.nivel_educativo,
+      estado_civil: estadoCivilNormalizado,
+      num_hijos: fichaData.num_hijos,
+      domicilio_actual: fichaData.domicilio_actual,
+      distrito: fichaData.distrito,
+      composicion_familiar: fichaData.composicion_familiar,
+      datos_economicos: fichaData.datos_economicos,
+      datos_vivienda: fichaData.datos_vivienda,
+      datos_salud: fichaData.datos_salud,
+      declaracion_jurada: fichaData.declaracion_jurada,
       updated_by: usuarioId,
-    })
+    };
+
+    // Eliminar campos undefined o null
+    Object.keys(cleanedData).forEach(key => {
+      if (cleanedData[key] === undefined || cleanedData[key] === null) {
+        delete cleanedData[key];
+      }
+    });
+
+    const response = await apiClient.put<FichaSocial>(`/api/v1/fichas-sociales/${id}`, cleanedData);
 
     if (response.success && response.data) {
       return response.data
