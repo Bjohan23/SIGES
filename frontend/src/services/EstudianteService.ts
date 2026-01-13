@@ -123,39 +123,41 @@ export class EstudianteService {
 
   // Obtener un estudiante por ID
   static async getEstudianteById(id: string): Promise<Estudiante> {
-    try {
-      const response = await apiClient.get<{ estudiante: Estudiante }>(
-        `/api/v1/estudiantes/${id}`
-      )
+    const response = await apiClient.get<{ estudiante: Estudiante }>(
+      `/api/v1/estudiantes/${id}`
+    )
 
-      if (response.success && response.data) {
-        return response.data.estudiante || response.data
-      }
-
-      throw new Error('Estudiante no encontrado')
-    } catch (error) {
-      throw error
+    if (response.success && response.data) {
+      return response.data.estudiante || response.data
     }
+
+    // Lanzar error con el mensaje del backend
+    const errorMsg = response.error?.message || 'Estudiante no encontrado'
+    const error: any = new Error(errorMsg)
+    error.status = response.error?.statusCode || 404
+    error.response = response
+    throw error
   }
 
   // Crear nuevo estudiante
   static async createEstudiante(
     data: CreateEstudianteData
   ): Promise<Estudiante> {
-    try {
-      const response = await apiClient.post<{ estudiante: Estudiante }>(
-        '/api/v1/estudiantes',
-        data
-      )
+    const response = await apiClient.post<{ estudiante: Estudiante }>(
+      '/api/v1/estudiantes',
+      data
+    )
 
-      if (response.success && response.data) {
-        return response.data.estudiante || response.data
-      }
-
-      throw new Error('No se pudo crear el estudiante')
-    } catch (error) {
-      throw error
+    if (response.success && response.data) {
+      return response.data.estudiante || response.data
     }
+
+    // Lanzar error con el mensaje del backend
+    const errorMsg = response.error?.message || 'No se pudo crear el estudiante'
+    const error: any = new Error(errorMsg)
+    error.status = response.error?.statusCode || 400
+    error.response = response
+    throw error
   }
 
   // Actualizar estudiante existente
@@ -163,27 +165,33 @@ export class EstudianteService {
     id: string,
     data: UpdateEstudianteData
   ): Promise<Estudiante> {
-    try {
-      const response = await apiClient.put<{ estudiante: Estudiante }>(
-        `/api/v1/estudiantes/${id}`,
-        data
-      )
+    const response = await apiClient.put<{ estudiante: Estudiante }>(
+      `/api/v1/estudiantes/${id}`,
+      data
+    )
 
-      if (response.success && response.data) {
-        return response.data.estudiante || response.data
-      }
-
-      throw new Error('No se pudo actualizar el estudiante')
-    } catch (error) {
-      throw error
+    if (response.success && response.data) {
+      return response.data.estudiante || response.data
     }
+
+    // Lanzar error con el mensaje del backend
+    const errorMsg = response.error?.message || 'No se pudo actualizar el estudiante'
+    const error: any = new Error(errorMsg)
+    error.status = response.error?.statusCode || 400
+    error.response = response
+    throw error
   }
 
   // Eliminar estudiante (soft delete)
   static async deleteEstudiante(id: string): Promise<void> {
-    try {
-      await apiClient.delete(`/api/v1/estudiantes/${id}`)
-    } catch (error) {
+    const response = await apiClient.delete(`/api/v1/estudiantes/${id}`)
+
+    if (!response.success) {
+      // Lanzar error con el mensaje del backend
+      const errorMsg = response.error?.message || 'No se pudo eliminar el estudiante'
+      const error: any = new Error(errorMsg)
+      error.status = response.error?.statusCode || 400
+      error.response = response
       throw error
     }
   }

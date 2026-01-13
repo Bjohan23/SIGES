@@ -5,7 +5,18 @@ export class ErrorHandler {
   static handleApiError(error: any): string {
     console.error('Error de API:', error)
 
-    // Errores de respuesta HTTP
+    // Si el error tiene response en el formato de nuestro API client (desde el servicio)
+    if (error.response && typeof error.response === 'object') {
+      // El error viene formateado desde el servicio con response.error.message
+      const message = error.response?.error?.message
+
+      // Retornar el mensaje directamente si existe
+      if (message) {
+        return message
+      }
+    }
+
+    // Errores de respuesta HTTP estándar de Axios
     if (error.response) {
       const status = error.response.status
       const message = error.response.data?.error?.message || error.response.data?.message

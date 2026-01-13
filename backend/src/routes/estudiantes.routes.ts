@@ -47,11 +47,24 @@ router.post('/',
     body('apellido_paterno').notEmpty().withMessage('Apellido paterno is required'),
     body('apellido_materno').notEmpty().withMessage('Apellido materno is required'),
     body('nombres').notEmpty().withMessage('Nombres are required'),
-    body('fecha_nacimiento').optional().isISO8601().withMessage('Valid fecha_nacimiento is required'),
-    body('dni').optional().isString().isLength({ min: 8, max: 8 }).withMessage('DNI must be 8 digits'),
-    body('telefono').optional().isString().withMessage('Telefono must be a string'),
-    body('email').optional().isEmail().withMessage('Valid email is required'),
-    body('direccion').optional().isString().withMessage('Direccion must be a string'),
+    body('fecha_nacimiento').optional({ nullable: true, checkFalsy: true }).isISO8601().withMessage('Valid fecha_nacimiento is required'),
+    body('dni').optional({ nullable: true, checkFalsy: true }).isString().isLength({ min: 8, max: 8 }).withMessage('DNI must be 8 digits'),
+    body('telefono').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+      if (value === null || value === undefined || value === '') return true;
+      if (typeof value === 'string') return true;
+      throw new Error('Telefono must be a string');
+    }),
+    body('email').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+      if (value === null || value === undefined || value === '') return true;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) throw new Error('Valid email is required');
+      return true;
+    }),
+    body('direccion').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+      if (value === null || value === undefined || value === '') return true;
+      if (typeof value === 'string') return true;
+      throw new Error('Direccion must be a string');
+    }),
   ],
   validateRequest,
   estudianteController.createEstudiante
@@ -65,11 +78,24 @@ router.put('/:id',
     body('apellido_paterno').optional().notEmpty().withMessage('Apellido paterno cannot be empty'),
     body('apellido_materno').optional().notEmpty().withMessage('Apellido materno cannot be empty'),
     body('nombres').optional().notEmpty().withMessage('Nombres cannot be empty'),
-    body('fecha_nacimiento').optional().isISO8601().withMessage('Valid fecha_nacimiento is required'),
-    body('dni').optional().isString().isLength({ min: 8, max: 8 }).withMessage('DNI must be 8 digits'),
-    body('telefono').optional().isString().withMessage('Telefono must be a string'),
-    body('email').optional().isEmail().withMessage('Valid email is required'),
-    body('direccion').optional().isString().withMessage('Direccion must be a string'),
+    body('fecha_nacimiento').optional({ nullable: true, checkFalsy: true }).isISO8601().withMessage('Valid fecha_nacimiento is required'),
+    body('dni').optional({ nullable: true, checkFalsy: true }).isString().isLength({ min: 8, max: 8 }).withMessage('DNI must be 8 digits'),
+    body('telefono').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+      if (value === null || value === undefined || value === '') return true;
+      if (typeof value === 'string') return true;
+      throw new Error('Telefono must be a string');
+    }),
+    body('email').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+      if (value === null || value === undefined || value === '') return true;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) throw new Error('Valid email is required');
+      return true;
+    }),
+    body('direccion').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+      if (value === null || value === undefined || value === '') return true;
+      if (typeof value === 'string') return true;
+      throw new Error('Direccion must be a string');
+    }),
     body('activo').optional().isBoolean().withMessage('Activo must be a boolean'),
   ],
   validateRequest,
