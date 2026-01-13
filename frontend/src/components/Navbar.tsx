@@ -42,6 +42,7 @@ export default function Navbar() {
     { name: 'Estudiantes', href: '/estudiantes' },
     { name: 'Fichas Sociales', href: '/fichas-sociales' },
     { name: 'Entrevistas', href: '/entrevistas' },
+    { name: 'Registros de Técnicas', href: '/registros' },
   ]
 
   const isActive = (href: string) => pathname === href

@@ -68,6 +68,28 @@ export abstract class BaseController implements IController {
     res.status(204).send();
   }
 
+  protected notFound(res: Response, message: string = 'Resource not found'): void {
+    res.status(404).json({
+      success: false,
+      error: {
+        message,
+        statusCode: 404,
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  protected unauthorized(res: Response, message: string = 'Unauthorized'): void {
+    res.status(401).json({
+      success: false,
+      error: {
+        message,
+        statusCode: 401,
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   protected getPaginationQuery(req: Request): IPaginationQuery {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));

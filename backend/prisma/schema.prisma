@@ -25,6 +25,13 @@ enum EstadoFicha {
   RECHAZADA
 }
 
+enum EstadoRegistro {
+  BORRADOR
+  EN_PROCESO
+  COMPLETADO
+  APROBADO
+}
+
 enum Sexo {
   M
   F
@@ -82,6 +89,18 @@ model Usuario {
   entrevistas_actualizadas     EntrevistaAplicada[] @relation("EntrevistaActualizador")
   estudiantes_creados          Estudiante[]       @relation("EstudianteCreador")
   estudiantes_actualizados     Estudiante[]       @relation("EstudianteActualizador")
+  informes_sociales_creados    InformeSocial[]    @relation("InformeSocialCreador")
+  informes_sociales_actualizados InformeSocial[] @relation("InformeSocialActualizador")
+  registros_entrevistas_creados    RegistroEntrevista[] @relation("RegistroEntrevistaCreador")
+  registros_entrevistas_actualizados RegistroEntrevista[] @relation("RegistroEntrevistaActualizador")
+  registros_visitas_creados     RegistroVisitaDomiciliaria[] @relation("RegistroVisitaCreador")
+  registros_visitas_actualizados RegistroVisitaDomiciliaria[] @relation("RegistroVisitaActualizador")
+  informes_visitas_creados      InformeVisitaDomiciliaria[] @relation("InformeVisitaCreador")
+  informes_visitas_actualizados InformeVisitaDomiciliaria[] @relation("InformeVisitaActualizador")
+  cronicas_creadas              CronicaCasoSocial[] @relation("CronicaCasoCreador")
+  cronicas_actualizadas         CronicaCasoSocial[] @relation("CronicaCasoActualizador")
+  situaciones_socio_familiares_creadas SituacionSocioFamiliar[] @relation("SituacionSocioFamiliarCreador")
+  situaciones_socio_familiares_actualizadas SituacionSocioFamiliar[] @relation("SituacionSocioFamiliarActualizador")
   auditorias                  Auditoria[]
 
   @@map("usuarios")
@@ -237,6 +256,12 @@ model Estudiante {
   actualizador      Usuario?               @relation("EstudianteActualizador", fields: [updated_by], references: [id])
   entrevistas        EntrevistaAplicada[]   // Relación inversa con EntrevistaAplicada
   fichas_sociales   FichaSocial[]          // Relación inversa con FichaSocial
+  informes_sociales  InformeSocial[]        // Relación inversa con InformeSocial
+  registros_entrevistas RegistroEntrevista[] // Relación inversa con RegistroEntrevista
+  registros_visitas  RegistroVisitaDomiciliaria[] // Relación inversa con RegistroVisitaDomiciliaria
+  informes_visitas   InformeVisitaDomiciliaria[] // Relación inversa con InformeVisitaDomiciliaria
+  cronicas           CronicaCasoSocial[]    // Relación inversa con CronicaCasoSocial
+  situaciones_socio_familiares SituacionSocioFamiliar[] // Relación inversa con SituacionSocioFamiliar
 
   @@index([codigo])
   @@index([apellido_paterno, apellido_materno])
@@ -244,5 +269,237 @@ model Estudiante {
   @@index([activo])
   @@index([created_at])
   @@map("estudiantes")
+}
+
+// Informe Social
+model InformeSocial {
+  id                   String              @id @default(uuid())
+  estudiante_id        String?
+
+  // I. Datos generales
+  nombres_apellidos    String?
+  edad                 Int?
+  estado_civil         String?
+  grado_instruccion    String?
+  direccion            String?
+  motivo               String?
+
+  // II. Situación familiar
+  situacion_familiar   String?             @db.Text
+
+  // III. Situación económica
+  situacion_economica  String?             @db.Text
+
+  // IV. Vivienda
+  vivienda             String?             @db.Text
+
+  // V. Educación
+  educacion            String?             @db.Text
+
+  // VI. Problema social
+  problema_social      String?             @db.Text
+
+  // VII. Apreciación profesional
+  apreciacion_profesional String?
+  lugar                String?
+  fecha                DateTime?
+
+  created_by           String?
+  updated_by           String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+
+  estudiante           Estudiante?         @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
+  creador              Usuario?            @relation("InformeSocialCreador", fields: [created_by], references: [id])
+  actualizador         Usuario?            @relation("InformeSocialActualizador", fields: [updated_by], references: [id])
+
+  @@index([estudiante_id])
+  @@index([created_at])
+  @@map("informes_sociales")
+}
+
+// Registro de Entrevista
+model RegistroEntrevista {
+  id                   String              @id @default(uuid())
+  estudiante_id        String?
+
+  lugar                String?
+  fecha                DateTime?
+  hora                 String?
+  tema                 String?
+  objetivo             String?
+  entrevistado         String?
+  entrevistador        String?
+  descripcion_relato   String?             @db.Text
+
+  estado               EstadoRegistro      @default(BORRADOR)
+
+  created_by           String?
+  updated_by           String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+
+  estudiante           Estudiante?         @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
+  creador              Usuario?            @relation("RegistroEntrevistaCreador", fields: [created_by], references: [id])
+  actualizador         Usuario?            @relation("RegistroEntrevistaActualizador", fields: [updated_by], references: [id])
+
+  @@index([estudiante_id])
+  @@index([fecha])
+  @@index([estado])
+  @@map("registros_entrevistas")
+}
+
+// Registro de Visita Domiciliaria
+model RegistroVisitaDomiciliaria {
+  id                   String              @id @default(uuid())
+  estudiante_id        String?
+
+  // I. Datos generales
+  nombre_entrevistado  String?
+  domicilio            String?
+  fecha_visita         DateTime?
+  responsable          String?
+
+  // II. Objetivo
+  objetivo             String?             @db.Text
+
+  // III. Relato
+  relato               String?             @db.Text
+
+  estado               EstadoRegistro      @default(BORRADOR)
+
+  created_by           String?
+  updated_by           String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+
+  estudiante           Estudiante?         @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
+  creador              Usuario?            @relation("RegistroVisitaCreador", fields: [created_by], references: [id])
+  actualizador         Usuario?            @relation("RegistroVisitaActualizador", fields: [updated_by], references: [id])
+
+  @@index([estudiante_id])
+  @@index([fecha_visita])
+  @@index([estado])
+  @@map("registros_visitas_domiciliarias")
+}
+
+// Informe de Visita Domiciliaria
+model InformeVisitaDomiciliaria {
+  id                   String              @id @default(uuid())
+  estudiante_id        String?
+
+  // I. Datos generales
+  nombres_apellidos    String?
+  direccion            String?
+  motivo               String?
+
+  // II. Objetivos
+  objetivos            String?             @db.Text
+
+  // III. Narración
+  narracion            String?             @db.Text
+
+  // IV. Conclusiones
+  conclusiones         String?             @db.Text
+
+  estado               EstadoRegistro      @default(BORRADOR)
+
+  created_by           String?
+  updated_by           String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+
+  estudiante           Estudiante?         @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
+  creador              Usuario?            @relation("InformeVisitaCreador", fields: [created_by], references: [id])
+  actualizador         Usuario?            @relation("InformeVisitaActualizador", fields: [updated_by], references: [id])
+
+  @@index([estudiante_id])
+  @@index([estado])
+  @@index([created_at])
+  @@map("informes_visitas_domiciliarias")
+}
+
+// Crónica de Caso Social
+model CronicaCasoSocial {
+  id                   String              @id @default(uuid())
+  estudiante_id        String?
+
+  // I. Datos generales
+  num_reunion          Int?
+  fecha_hora           DateTime?
+  nombres_apellidos    String?
+  asistentes           String?
+
+  // II. Actividades realizadas
+  actividades_realizadas String?           @db.Text
+
+  // III. Programas
+  programas            String?             @db.Text
+
+  // IV. Relato
+  relato               String?             @db.Text
+
+  // V. Interpretación
+  interpretacion       String?             @db.Text
+
+  // VI. Sugerencias
+  sugerencias          String?             @db.Text
+
+  estado               EstadoRegistro      @default(BORRADOR)
+
+  created_by           String?
+  updated_by           String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+
+  estudiante           Estudiante?         @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
+  creador              Usuario?            @relation("CronicaCasoCreador", fields: [created_by], references: [id])
+  actualizador         Usuario?            @relation("CronicaCasoActualizador", fields: [updated_by], references: [id])
+
+  @@index([estudiante_id])
+  @@index([fecha_hora])
+  @@index([estado])
+  @@map("cronicas_casos_sociales")
+}
+
+// Situación Socio Familiar
+model SituacionSocioFamiliar {
+  id                   String              @id @default(uuid())
+  estudiante_id        String?
+
+  // INTERACCIÓN Y UNIDAD FAMILIAR
+  subsistema_conyugal  String?             @db.Text
+  subsistema_paterno_fiscal String?        @db.Text
+  subsistema_fraternal String?             @db.Text
+  solidaridad_familiar  String?            @db.Text
+  relaciones           String?             @db.Text
+
+  // DESEMPEÑO DE ROLES
+  desempeno_roles      String?             @db.Text
+
+  // RELACIONES DE CRIANZA
+  relaciones_crianza   String?             @db.Text
+
+  // RELACIONES CON EL EXOGRUPO
+  relaciones_exogrupo  String?             @db.Text
+
+  // PAUTAS DE VIDA FAMILIAR
+  pautas_vida_familiar String?             @db.Text
+
+  estado               EstadoRegistro      @default(BORRADOR)
+
+  created_by           String?
+  updated_by           String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+
+  estudiante           Estudiante?         @relation(fields: [estudiante_id], references: [id], onDelete: SetNull)
+  creador              Usuario?            @relation("SituacionSocioFamiliarCreador", fields: [created_by], references: [id])
+  actualizador         Usuario?            @relation("SituacionSocioFamiliarActualizador", fields: [updated_by], references: [id])
+
+  @@index([estudiante_id])
+  @@index([estado])
+  @@index([created_at])
+  @@map("situaciones_socio_familiares")
 }
 
