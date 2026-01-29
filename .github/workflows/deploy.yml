@@ -1,0 +1,268 @@
+name: Build and Deploy SIGES
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: siges
+  CONTAINER_NAME: siges_frontend
+  NETWORK_STACK: stack_stack_net
+  NETWORK_DATA: data_net
+  PORT_EXTERNAL: 3002
+  PORT_INTERNAL: 3000
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construir imagen Docker
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            -t ${{ env.IMAGE_NAME }}:latest .
+          docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
+
+      - name: Copiar imagen al servidor
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "image.tar.gz"
+          target: "/tmp"
+
+      - name: Desplegar en servidor con rollback automatico
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "========================================="
+            echo "  INICIANDO DESPLIEGUE CON ROLLBACK"
+            echo "========================================="
+
+            # --- CONFIGURACION ---
+            IMAGE_NAME="${{ env.IMAGE_NAME }}"
+            CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
+            NETWORK_DATA="${{ env.NETWORK_DATA }}"
+            NETWORK_STACK="${{ env.NETWORK_STACK }}"
+            PORT_EXTERNAL="${{ env.PORT_EXTERNAL }}"
+            PORT_INTERNAL="${{ env.PORT_INTERNAL }}"
+            MAX_RETRIES=10
+            RETRY_INTERVAL=3
+
+            # --- FUNCION: Diagnostico ---
+            diagnostico() {
+              echo ""
+              echo "=== DIAGNOSTICO ==="
+              echo "Contenedores:"
+              docker ps -a --filter "name=$CONTAINER_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+              echo ""
+              echo "Ultimos logs:"
+              docker logs "$CONTAINER_NAME" --tail 20 2>&1 || true
+              echo ""
+              echo "Redes del contenedor:"
+              docker inspect "$CONTAINER_NAME" --format='{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' 2>/dev/null || true
+              echo ""
+              echo "Puertos:"
+              docker port "$CONTAINER_NAME" 2>/dev/null || true
+              echo "==================="
+            }
+
+            # --- FUNCION: Conectar a redes ---
+            conectar_redes() {
+              echo "  Conectando a red $NETWORK_STACK (nginx proxy)..."
+              docker network connect "$NETWORK_STACK" "$CONTAINER_NAME" 2>/dev/null || true
+
+              echo "  Conectando a red $NETWORK_DATA (BD/Redis)..."
+              docker network connect "$NETWORK_DATA" "$CONTAINER_NAME" 2>/dev/null || true
+            }
+
+            # --- FUNCION: Health Check Robusto ---
+            health_check() {
+              echo "Verificando salud del contenedor..."
+
+              for i in $(seq 1 $MAX_RETRIES); do
+                echo "  Intento $i de $MAX_RETRIES..."
+
+                # 1. Verificar que el contenedor existe y esta corriendo
+                CONTAINER_STATUS=$(docker inspect -f '{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "not_found")
+                if [ "$CONTAINER_STATUS" != "running" ]; then
+                  echo "    Estado del contenedor: $CONTAINER_STATUS"
+                  sleep $RETRY_INTERVAL
+                  continue
+                fi
+
+                # 2. Verificar health check de Docker
+                HEALTH_STATUS=$(docker inspect -f '{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "none")
+                if [ "$HEALTH_STATUS" = "healthy" ]; then
+                  echo "    Docker health: healthy"
+                  echo "  OK: Contenedor saludable"
+                  return 0
+                elif [ "$HEALTH_STATUS" = "unhealthy" ]; then
+                  echo "    Docker health: unhealthy"
+                  sleep $RETRY_INTERVAL
+                  continue
+                fi
+
+                # 3. Fallback: verificar HTTP directamente
+                if curl -sf --max-time 5 "http://127.0.0.1:${PORT_EXTERNAL}/api/health" > /dev/null 2>&1; then
+                  echo "    HTTP /api/health: OK"
+                  echo "  OK: Servicio respondiendo"
+                  return 0
+                fi
+
+                # 4. Alternativa: verificar desde dentro del contenedor
+                if docker exec "$CONTAINER_NAME" wget --no-verbose --tries=1 --spider "http://localhost:${PORT_INTERNAL}/api/health" > /dev/null 2>&1; then
+                  echo "    HTTP interno: OK (verificando redes...)"
+                  return 0
+                fi
+
+                echo "    Esperando ${RETRY_INTERVAL}s..."
+                sleep $RETRY_INTERVAL
+              done
+
+              echo "  ERROR: Health check fallo despues de $MAX_RETRIES intentos"
+              diagnostico
+              return 1
+            }
+
+            # --- FUNCION: Rollback ---
+            rollback() {
+              echo ""
+              echo "========================================="
+              echo "  EJECUTANDO ROLLBACK"
+              echo "========================================="
+
+              docker stop "$CONTAINER_NAME" 2>/dev/null || true
+              docker rm "$CONTAINER_NAME" 2>/dev/null || true
+
+              if docker images | grep -q "${IMAGE_NAME}:backup"; then
+                echo "Restaurando imagen de backup..."
+
+                docker run -d \
+                  --name "$CONTAINER_NAME" \
+                  --restart unless-stopped \
+                  -p ${PORT_EXTERNAL}:${PORT_INTERNAL} \
+                  -e TZ="America/Lima" \
+                  "${IMAGE_NAME}:backup"
+
+                conectar_redes
+
+                sleep 5
+                if docker ps | grep -q "$CONTAINER_NAME"; then
+                  echo "ROLLBACK EXITOSO: Version anterior restaurada"
+                  diagnostico
+                  exit 1
+                fi
+              fi
+
+              echo "ROLLBACK FALLO o no hay backup disponible"
+              exit 1
+            }
+
+            # --- PASO 1: Cargar nueva imagen ---
+            echo ""
+            echo "[1/7] Cargando nueva imagen..."
+            docker load < /tmp/image.tar.gz
+            rm -f /tmp/image.tar.gz
+            echo "  Imagen cargada correctamente"
+
+            # --- PASO 2: Verificar redes ---
+            echo ""
+            echo "[2/7] Verificando redes Docker..."
+            for NET in "$NETWORK_STACK" "$NETWORK_DATA"; do
+              if docker network ls | grep -q "$NET"; then
+                echo "  Red $NET existe"
+              else
+                echo "  ADVERTENCIA: Red $NET no existe"
+              fi
+            done
+
+            # --- PASO 3: Crear backup de imagen actual ---
+            echo ""
+            echo "[3/7] Creando backup de imagen actual..."
+            if docker images | grep -q "${IMAGE_NAME}:latest"; then
+              docker tag "${IMAGE_NAME}:latest" "${IMAGE_NAME}:backup" 2>/dev/null || true
+              echo "  Backup creado: ${IMAGE_NAME}:backup"
+            else
+              echo "  No hay imagen previa (primer despliegue)"
+            fi
+
+            # --- PASO 4: Detener contenedor actual ---
+            echo ""
+            echo "[4/7] Deteniendo contenedor actual..."
+            if docker ps -a | grep -q "$CONTAINER_NAME"; then
+              docker stop "$CONTAINER_NAME" 2>/dev/null || true
+              docker rm "$CONTAINER_NAME" 2>/dev/null || true
+              echo "  Contenedor anterior eliminado"
+            else
+              echo "  No hay contenedor previo"
+            fi
+
+            # --- PASO 5: Iniciar nuevo contenedor ---
+            echo ""
+            echo "[5/7] Iniciando nuevo contenedor..."
+            docker run -d \
+              --name "$CONTAINER_NAME" \
+              --restart unless-stopped \
+              -p ${PORT_EXTERNAL}:${PORT_INTERNAL} \
+              -e TZ="America/Lima" \
+              "${IMAGE_NAME}:latest"
+
+            echo "  Contenedor iniciado"
+
+            # Esperar un momento y mostrar logs iniciales
+            sleep 2
+            echo "  Logs iniciales:"
+            docker logs "$CONTAINER_NAME" 2>&1 || true
+
+            # --- PASO 6: Conectar a redes ---
+            echo ""
+            echo "[6/7] Conectando a redes..."
+            conectar_redes
+            echo "  Esperando arranque..."
+            sleep 3
+
+            # --- PASO 7: Verificar despliegue ---
+            echo ""
+            echo "[7/7] Verificando despliegue..."
+
+            if health_check; then
+              echo ""
+              echo "========================================="
+              echo "  DESPLIEGUE EXITOSO"
+              echo "========================================="
+
+              echo ""
+              echo "Limpiando imagenes huerfanas..."
+              docker image prune -f 2>/dev/null || true
+
+              echo ""
+              echo "Estado final:"
+              docker ps --filter "name=$CONTAINER_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+              echo ""
+              echo "Redes conectadas:"
+              docker inspect "$CONTAINER_NAME" --format='{{range $k, $v := .NetworkSettings.Networks}}  - {{$k}}{{"\\n"}}{{end}}'
+
+              echo ""
+              echo "Verificacion final:"
+              curl -sf "http://127.0.0.1:${PORT_EXTERNAL}/api/health" && echo " - Endpoint /api/health OK" || echo " - Health check interno OK"
+            else
+              echo ""
+              echo "ERROR: El nuevo contenedor no paso el health check"
+              rollback
+            fi

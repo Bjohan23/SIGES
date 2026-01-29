@@ -1,0 +1,40 @@
+# Dependencies
+**/node_modules
+npm-debug.log*
+
+# Next.js build output
+**/.next
+**/out
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Docs/Examples
+*.md
+deploy_example.yml
+Dockerfileexample
+render.yml
+
+# Tests
+coverage
+.nyc_output
+
+# Environment files
+**/.env*
+!**/.env.example
