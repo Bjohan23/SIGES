@@ -1,4 +1,9 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+  _retryCount?: number;
+}
 
 // Cliente API optimizado para comunicación con el backend SIGES
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -97,7 +102,7 @@ class ApiClient {
         return response;
       },
       async (error: AxiosError) => {
-        const originalRequest = error.config;
+        const originalRequest = error.config as CustomAxiosRequestConfig;
 
         // Log de errores (más detallado para debugging)
         console.error('❌ API Error:', {
@@ -154,6 +159,8 @@ class ApiClient {
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+    if (!ctx) return 'canvas-error';
+
     const text = 'navigator.userAgent:' + navigator.userAgent +
                   'screen.width:' + screen.width +
                   'screen.height:' + screen.height;
@@ -166,10 +173,10 @@ class ApiClient {
 
   private shouldCache(response: AxiosResponse): boolean {
     // Solo cachear responses GET exitosas y estáticas
-    return response.config.method === 'get' &&
+    return (response.config.method === 'get' &&
            response.status === 200 &&
-           response.config.url?.includes('/health') ||
-           response.config.url?.includes('/version');
+           (response.config.url?.includes('/health') ||
+           response.config.url?.includes('/version'))) ?? false;
   }
 
   private cacheResponse(response: AxiosResponse): void {
@@ -193,7 +200,7 @@ class ApiClient {
   private shouldRetry(error: AxiosError): boolean {
     // Solo retry en errores de red o 5xx
     if (!error.config) return false;
-    if (error.config._retryCount >= 2) return false; // Reducido de 3 a 2 retries
+    if (((error.config as CustomAxiosRequestConfig)._retryCount || 0) >= 2) return false; // Reducido de 3 a 2 retries
 
     return (
       !error.response || // Error de red
@@ -209,7 +216,7 @@ class ApiClient {
     // Retraso exponencial reducido para mejor UX
     const baseDelay = 500;
     const maxDelay = 5000;
-    const retryCount = (error.config?._retryCount || 0) + 1;
+    const retryCount = ((error.config as CustomAxiosRequestConfig)?._retryCount || 0) + 1;
     const delay = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
     const jitter = Math.random() * 500;
 
@@ -222,9 +229,10 @@ class ApiClient {
 
   private formatError(error: AxiosError): Error {
     if (error.response) {
-      const message = error.response.data?.error?.message ||
-                    error.response.data?.message ||
-                    `HTTP ${error.response.status}: ${error.statusText}`;
+      const errorData = error.response.data as any; // Cast safely or use generic
+      const message = errorData?.error?.message ||
+                    errorData?.message ||
+                    `HTTP ${error.response.status}: ${error.response.statusText}`;
 
       const apiError = new Error(message) as any;
       apiError.status = error.response.status;
@@ -269,11 +277,12 @@ class ApiClient {
   async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
     const config: AxiosRequestConfig = {
       method: 'GET',
+      url: endpoint,
       params,
     };
 
     try {
-      const response = await this.axiosInstance.request<ApiResponse<T>>(endpoint, config);
+      const response = await this.axiosInstance.request<ApiResponse<T>>(config);
       return response.data;
     } catch (error) {
       throw error;
@@ -283,12 +292,13 @@ class ApiClient {
   async post<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const requestConfig: AxiosRequestConfig = {
       method: 'POST',
+      url: endpoint,
       data,
       ...config,
     };
 
     try {
-      const response = await this.axiosInstance.request<ApiResponse<T>>(endpoint, requestConfig);
+      const response = await this.axiosInstance.request<ApiResponse<T>>(requestConfig);
       return response.data;
     } catch (error) {
       throw error;
@@ -298,12 +308,13 @@ class ApiClient {
   async put<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const requestConfig: AxiosRequestConfig = {
       method: 'PUT',
+      url: endpoint,
       data,
       ...config,
     };
 
     try {
-      const response = await this.axiosInstance.request<ApiResponse<T>>(endpoint, requestConfig);
+      const response = await this.axiosInstance.request<ApiResponse<T>>(requestConfig);
       return response.data;
     } catch (error) {
       throw error;
@@ -313,12 +324,13 @@ class ApiClient {
   async patch<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const requestConfig: AxiosRequestConfig = {
       method: 'PATCH',
+      url: endpoint,
       data,
       ...config,
     };
 
     try {
-      const response = await this.axiosInstance.request<ApiResponse<T>>(endpoint, requestConfig);
+      const response = await this.axiosInstance.request<ApiResponse<T>>(requestConfig);
       return response.data;
     } catch (error) {
       throw error;
@@ -328,11 +340,12 @@ class ApiClient {
   async delete<T>(endpoint: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     const requestConfig: AxiosRequestConfig = {
       method: 'DELETE',
+      url: endpoint,
       ...config,
     };
 
     try {
-      const response = await this.axiosInstance.request<ApiResponse<T>>(endpoint, requestConfig);
+      const response = await this.axiosInstance.request<ApiResponse<T>>(requestConfig);
       return response.data;
     } catch (error) {
       throw error;

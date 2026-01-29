@@ -4,8 +4,15 @@
 import toast, { Toast, Toaster } from 'react-hot-toast'
 import type { FichaSocial } from '@/types'
 
+// Tipo para ficha con propiedades opcionales para alertas
+type FichaSocialPartial = Partial<FichaSocial> & {
+  porcentaje_completado: number
+  estado: string
+  _count?: { entrevistas: number }
+}
+
 interface FichaSocialAlertProps {
-  ficha: FichaSocial
+  ficha: FichaSocialPartial
   type: 'success' | 'error' | 'warning' | 'info'
   title: string
   message?: string
@@ -34,11 +41,11 @@ export function FichaSocialAlert({ ficha, type, title, message }: FichaSocialAle
 
   const getEstadoColor = () => {
     const colors = {
-      'COMPLETA': 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-      'INCOMPLETA': 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
-      'DISFUNCIONAL': 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+      'completa': 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+      'incompleta': 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
+      'disfuncional': 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
     }
-    return colors[ficha.estado as keyof typeof colors] || colors['INCOMPLETA']
+    return colors[ficha.estado as keyof typeof colors] || colors['incompleta']
   }
 
   const getProgressColor = () => {
@@ -135,11 +142,11 @@ export function FichaSocialAlert({ ficha, type, title, message }: FichaSocialAle
               </div>
             )}
 
-            {/* Alerta específica para estado INCOMPLETA con 100% de progreso */}
-            {ficha.estado === 'INCOMPLETA' && ficha.porcentaje_completado === 100 && (
+            {/* Alerta específica para estado incompleta con 100% de progreso */}
+            {ficha.estado === 'incompleta' && ficha.porcentaje_completado === 100 && (
               <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded">
                 <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                  ⚠️ La ficha muestra 100% de progreso pero aún está marcada como INCOMPLETA.
+                  La ficha muestra 100% de progreso pero aún está marcada como incompleta.
                   {ficha._count?.entrevistas === 0 ? ' Requiere al menos una entrevista.' : ' Verifique los datos faltantes.'}
                 </p>
               </div>
@@ -156,13 +163,13 @@ export function FichaSocialAlert({ ficha, type, title, message }: FichaSocialAle
           </div>
 
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Creada: {new Date(ficha.created_at).toLocaleDateString('es-PE', {
+            Creada: {ficha.created_at ? new Date(ficha.created_at).toLocaleDateString('es-PE', {
               day: '2-digit',
               month: '2-digit',
               year: 'numeric',
               hour: '2-digit',
               minute: '2-digit'
-            })}
+            }) : 'Fecha no disponible'}
           </p>
         </div>
       </div>
@@ -172,7 +179,7 @@ export function FichaSocialAlert({ ficha, type, title, message }: FichaSocialAle
 
 // Funciones helper para mostrar las alertas
 export const fichaSocialAlerts = {
-  success: (ficha: FichaSocial, title: string, message?: string) => {
+  success: (ficha: FichaSocialPartial, title: string, message?: string) => {
     toast.custom((t: Toast) => (
       <div className={`${t.visible ? 'animate-enter' : 'animate-exit'}`}>
         <FichaSocialAlert ficha={ficha} type="success" title={title} message={message} />
@@ -183,7 +190,7 @@ export const fichaSocialAlerts = {
     })
   },
 
-  error: (ficha: FichaSocial, title: string, message?: string) => {
+  error: (ficha: FichaSocialPartial, title: string, message?: string) => {
     toast.custom((t: Toast) => (
       <div className={`${t.visible ? 'animate-enter' : 'animate-exit'}`}>
         <FichaSocialAlert ficha={ficha} type="error" title={title} message={message} />
@@ -194,7 +201,7 @@ export const fichaSocialAlerts = {
     })
   },
 
-  warning: (ficha: FichaSocial, title: string, message?: string) => {
+  warning: (ficha: FichaSocialPartial, title: string, message?: string) => {
     toast.custom((t: Toast) => (
       <div className={`${t.visible ? 'animate-enter' : 'animate-exit'}`}>
         <FichaSocialAlert ficha={ficha} type="warning" title={title} message={message} />
@@ -205,7 +212,7 @@ export const fichaSocialAlerts = {
     })
   },
 
-  info: (ficha: FichaSocial, title: string, message?: string) => {
+  info: (ficha: FichaSocialPartial, title: string, message?: string) => {
     toast.custom((t: Toast) => (
       <div className={`${t.visible ? 'animate-enter' : 'animate-exit'}`}>
         <FichaSocialAlert ficha={ficha} type="info" title={title} message={message} />

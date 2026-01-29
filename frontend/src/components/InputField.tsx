@@ -19,6 +19,7 @@ interface InputFieldProps {
   max?: number
   maxLength?: number
   step?: string
+  pattern?: string
 }
 
 export default function InputField({
@@ -37,6 +38,7 @@ export default function InputField({
   max,
   maxLength,
   step,
+  pattern,
 }: InputFieldProps) {
   return (
     <div>
@@ -61,6 +63,7 @@ export default function InputField({
           max={max}
           maxLength={maxLength}
           step={step}
+          pattern={pattern}
           className={`block w-full ${
             icon ? 'pl-10' : 'pl-3'
           } pr-3 py-3 border ${

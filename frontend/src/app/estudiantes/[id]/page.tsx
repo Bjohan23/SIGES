@@ -8,6 +8,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { EstudianteService } from '@/services/EstudianteService'
+import { formatDate } from '@/utils/date'
 import Navbar from '@/components/Navbar'
 import ErrorAlert from '@/components/ErrorAlert'
 import type { Estudiante } from '@/types'
@@ -64,15 +65,6 @@ export default function EstudianteDetallePage() {
         </main>
       </div>
     )
-  }
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'No registrado'
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
   }
 
   return (

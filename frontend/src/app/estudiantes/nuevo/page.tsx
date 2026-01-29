@@ -67,11 +67,11 @@ export default function NuevoEstudiantePage() {
         apellido_paterno: apellidoPaterno.trim(),
         apellido_materno: apellidoMaterno.trim(),
         nombres: nombres.trim(),
-        fecha_nacimiento: fechaNacimiento || null,
-        dni: dni.trim() || null,
-        telefono: telefono.trim() || null,
-        email: email.trim() || null,
-        direccion: direccion.trim() || null,
+        fecha_nacimiento: fechaNacimiento || undefined,
+        dni: dni.trim() || undefined,
+        telefono: telefono.trim() || undefined,
+        email: email.trim() || undefined,
+        direccion: direccion.trim() || undefined,
       })
 
       alert('Estudiante creado exitosamente')

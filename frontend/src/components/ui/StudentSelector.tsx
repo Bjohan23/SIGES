@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { EstudianteService } from '@/services/EstudianteService'
+import { calculateAge } from '@/utils/date'
 import type { Estudiante } from '@/types'
 
 interface StudentSelectorProps {
@@ -72,18 +73,6 @@ export default function StudentSelector({
     setResults([])
     setShowDropdown(false)
     onStudentSelect(null as any)
-  }
-
-  const calculateAge = (fechaNacimiento: string | null) => {
-    if (!fechaNacimiento) return null
-    const today = new Date()
-    const birthDate = new Date(fechaNacimiento)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
-    }
-    return age
   }
 
   const handleCreateNew = () => {

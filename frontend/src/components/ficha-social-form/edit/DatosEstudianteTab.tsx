@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useFichaSocialForm } from "../FormContextWrapper";
-import InputField from "@/components/InputField";
+import React from 'react';
+import { useFichaSocialForm } from '../FormContextWrapper';
+import InputField from '@/components/InputField';
 
 export default function DatosEstudianteTab() {
   const { formData, errors, updateFormData } = useFichaSocialForm();
@@ -18,7 +18,7 @@ export default function DatosEstudianteTab() {
           label="Apellido Paterno"
           type="text"
           value={formData.apellido_paterno || ''}
-          onChange={(e) => updateFormData("apellido_paterno", e.target.value)}
+          onChange={(e) => updateFormData('apellido_paterno', e.target.value)}
           error={errors.apellido_paterno}
           required
         />
@@ -29,7 +29,7 @@ export default function DatosEstudianteTab() {
           label="Apellido Materno"
           type="text"
           value={formData.apellido_materno || ''}
-          onChange={(e) => updateFormData("apellido_materno", e.target.value)}
+          onChange={(e) => updateFormData('apellido_materno', e.target.value)}
           error={errors.apellido_materno}
           required
         />
@@ -40,7 +40,7 @@ export default function DatosEstudianteTab() {
           label="Nombres"
           type="text"
           value={formData.nombres || ''}
-          onChange={(e) => updateFormData("nombres", e.target.value)}
+          onChange={(e) => updateFormData('nombres', e.target.value)}
           error={errors.nombres}
           required
         />
@@ -53,7 +53,7 @@ export default function DatosEstudianteTab() {
           <select
             id="sexo"
             value={formData.sexo || ''}
-            onChange={(e) => updateFormData("sexo", e.target.value)}
+            onChange={(e) => updateFormData('sexo', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
             required
           >
@@ -61,9 +61,7 @@ export default function DatosEstudianteTab() {
             <option value="M">Masculino</option>
             <option value="F">Femenino</option>
           </select>
-          {errors.sexo && (
-            <p className="mt-1 text-sm text-red-600">{errors.sexo}</p>
-          )}
+          {errors.sexo && <p className="mt-1 text-sm text-red-600">{errors.sexo}</p>}
         </div>
 
         {/* Fecha de Nacimiento */}
@@ -72,7 +70,7 @@ export default function DatosEstudianteTab() {
           label="Fecha de Nacimiento"
           type="date"
           value={formData.fecha_nacimiento || ''}
-          onChange={(e) => updateFormData("fecha_nacimiento", e.target.value)}
+          onChange={(e) => updateFormData('fecha_nacimiento', e.target.value)}
           error={errors.fecha_nacimiento}
           required
         />
@@ -83,10 +81,12 @@ export default function DatosEstudianteTab() {
           label="Edad"
           type="number"
           value={formData.edad || ''}
-          onChange={(e) => updateFormData("edad", e.target.value ? parseInt(e.target.value) : undefined)}
+          onChange={(e) =>
+            updateFormData('edad', e.target.value ? parseInt(e.target.value) : undefined)
+          }
           error={errors.edad}
-          min="0"
-          max="120"
+          min={0}
+          max={120}
         />
 
         {/* Nacionalidad */}
@@ -97,7 +97,7 @@ export default function DatosEstudianteTab() {
           <select
             id="nacionalidad"
             value={formData.nacionalidad || 'Peruana'}
-            onChange={(e) => updateFormData("nacionalidad", e.target.value)}
+            onChange={(e) => updateFormData('nacionalidad', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
             required
           >
@@ -110,13 +110,13 @@ export default function DatosEstudianteTab() {
         </div>
 
         {/* DNI o Carné de Extranjería */}
-        {(formData.nacionalidad === 'Peruana' || !formData.nacionalidad) ? (
+        {formData.nacionalidad === 'Peruana' || !formData.nacionalidad ? (
           <InputField
             id="dni"
             label="DNI"
             type="text"
             value={formData.dni || ''}
-            onChange={(e) => updateFormData("dni", e.target.value)}
+            onChange={(e) => updateFormData('dni', e.target.value)}
             error={errors.dni}
             maxLength={8}
             pattern="[0-9]{8}"
@@ -129,7 +129,7 @@ export default function DatosEstudianteTab() {
             label="Carné de Extranjería"
             type="text"
             value={formData.carne_extranjeria || ''}
-            onChange={(e) => updateFormData("carne_extranjeria", e.target.value)}
+            onChange={(e) => updateFormData('carne_extranjeria', e.target.value)}
             error={errors.carne_extranjeria}
             required
           />
@@ -141,7 +141,7 @@ export default function DatosEstudianteTab() {
           label="Grado"
           type="text"
           value={formData.grado || ''}
-          onChange={(e) => updateFormData("grado", e.target.value)}
+          onChange={(e) => updateFormData('grado', e.target.value)}
           error={errors.grado}
         />
 
@@ -151,7 +151,7 @@ export default function DatosEstudianteTab() {
           label="Sección"
           type="text"
           value={formData.seccion || ''}
-          onChange={(e) => updateFormData("seccion", e.target.value)}
+          onChange={(e) => updateFormData('seccion', e.target.value)}
           error={errors.seccion}
         />
 
@@ -163,7 +163,7 @@ export default function DatosEstudianteTab() {
           <select
             id="nivel_educativo"
             value={formData.nivel_educativo || ''}
-            onChange={(e) => updateFormData("nivel_educativo", e.target.value)}
+            onChange={(e) => updateFormData('nivel_educativo', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="">Seleccione...</option>
@@ -185,7 +185,7 @@ export default function DatosEstudianteTab() {
           <select
             id="estado_civil"
             value={formData.estado_civil || ''}
-            onChange={(e) => updateFormData("estado_civil", e.target.value)}
+            onChange={(e) => updateFormData('estado_civil', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="">Seleccione...</option>
@@ -206,9 +206,11 @@ export default function DatosEstudianteTab() {
           label="Número de Hijos"
           type="number"
           value={formData.num_hijos || 0}
-          onChange={(e) => updateFormData("num_hijos", e.target.value ? parseInt(e.target.value) : 0)}
+          onChange={(e) =>
+            updateFormData('num_hijos', e.target.value ? parseInt(e.target.value) : 0)
+          }
           error={errors.num_hijos}
-          min="0"
+          min={0}
         />
 
         {/* Domicilio Actual */}
@@ -218,7 +220,7 @@ export default function DatosEstudianteTab() {
             label="Domicilio Actual"
             type="text"
             value={formData.domicilio_actual || ''}
-            onChange={(e) => updateFormData("domicilio_actual", e.target.value)}
+            onChange={(e) => updateFormData('domicilio_actual', e.target.value)}
             error={errors.domicilio_actual}
             required
           />
@@ -230,7 +232,7 @@ export default function DatosEstudianteTab() {
           label="Distrito"
           type="text"
           value={formData.distrito || ''}
-          onChange={(e) => updateFormData("distrito", e.target.value)}
+          onChange={(e) => updateFormData('distrito', e.target.value)}
           error={errors.distrito}
           required
         />

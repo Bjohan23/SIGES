@@ -7,6 +7,7 @@ import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { useEntrevistas } from '@/hooks/useEntrevistas'
+import { calculateAge } from '@/utils/date'
 import StudentSelector from '@/components/ui/StudentSelector'
 import Navbar from '@/components/Navbar'
 import ErrorAlert from '@/components/ErrorAlert'
@@ -47,18 +48,6 @@ export default function NuevaEntrevistaPage() {
       router.push('/')
     }
   }, [user, authLoading, router])
-
-  const calculateAge = (fechaNacimiento: string | null) => {
-    if (!fechaNacimiento) return null
-    const today = new Date()
-    const birthDate = new Date(fechaNacimiento)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
-    }
-    return age
-  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -115,8 +104,8 @@ export default function NuevaEntrevistaPage() {
         estudiante_id: selectedStudent.id,
         estudiante_nombres: selectedStudent.nombres,
         estudiante_apellidos: `${selectedStudent.apellido_paterno} ${selectedStudent.apellido_materno}`,
-        estudiante_edad: calculateAge(selectedStudent.fecha_nacimiento) || undefined,
-        estudiante_fecha_nacimiento: selectedStudent.fecha_nacimiento || undefined,
+        estudiante_edad: calculateAge(selectedStudent.fecha_nacimiento) ?? undefined,
+        estudiante_fecha_nacimiento: selectedStudent.fecha_nacimiento,
         grado: grado.trim(),
         aula: aula.trim(),
         respuestas,

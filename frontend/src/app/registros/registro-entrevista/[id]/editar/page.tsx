@@ -78,7 +78,7 @@ export default function EditarRegistroEntrevistaPage() {
 
       const data: UpdateRegistroEntrevistaData = {
         lugar: lugar.trim() || undefined,
-        fecha: fecha ? new Date(fecha) : undefined,
+        fecha: fecha || undefined,
         hora: hora.trim() || undefined,
         tema: tema.trim() || undefined,
         objetivo: objetivo.trim() || undefined,

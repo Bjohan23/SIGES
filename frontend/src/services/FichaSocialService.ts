@@ -36,7 +36,7 @@ export class FichaSocialService {
 
       if (response.success && response.data) {
         // El backend devuelve {fichas: [], pagination: {}}
-        return Array.isArray(response.data) ? response.data : response.data.fichas || []
+        return Array.isArray(response.data) ? response.data : (response.data as any).fichas || []
       }
 
       return []
@@ -62,7 +62,7 @@ export class FichaSocialService {
   }
 
   // Calcular porcentaje de completado
-  private static calcularPorcentajeCompletado(fichaData: Partial<FichaSocial>): number {
+  static calcularPorcentajeCompletado(fichaData: Partial<FichaSocial>): number {
     let completedFields = 0
     let totalFields = 32 // Total de campos obligatorios
 

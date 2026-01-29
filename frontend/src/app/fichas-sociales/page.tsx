@@ -105,7 +105,7 @@ export default function FichasSocialesPage() {
           <>
             {/* Alertas para estados inconsistentes */}
             {fichas.filter(ficha =>
-              ficha.estado === 'INCOMPLETA' && ficha.porcentaje_completado === 100
+              ficha.estado === 'incompleta' && ficha.porcentaje_completado === 100
             ).map(ficha => (
               <div key={`alert-${ficha.id}`} className="mb-4">
                 <div
@@ -143,9 +143,9 @@ export default function FichasSocialesPage() {
             {/* Contador */}
             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               Total: {fichas.length} ficha{fichas.length !== 1 ? 's' : ''}
-              {fichas.filter(f => f.estado === 'INCOMPLETA' && f.porcentaje_completado === 100).length > 0 && (
+              {fichas.filter(f => f.estado === 'incompleta' && f.porcentaje_completado === 100).length > 0 && (
                 <span className="ml-2 text-yellow-600 dark:text-yellow-400">
-                  ({fichas.filter(f => f.estado === 'INCOMPLETA' && f.porcentaje_completado === 100).length} con estado inconsistente)
+                  ({fichas.filter(f => f.estado === 'incompleta' && f.porcentaje_completado === 100).length} con estado inconsistente)
                 </span>
               )}
             </div>

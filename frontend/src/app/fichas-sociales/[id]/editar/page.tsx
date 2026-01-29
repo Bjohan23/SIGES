@@ -43,7 +43,7 @@ interface FormState {
   grado?: string;
   seccion?: string;
   nivel_educativo?: string;
-  estado_civil: string;
+  estado_civil?: 'soltero' | 'conviviente' | 'casado' | 'separado' | 'viudo';
   num_hijos: number;
   domicilio_actual: string;
   distrito: string;
@@ -69,7 +69,7 @@ function mapFichaToFormData(ficha: FichaSocial): FormState {
     grado: ficha.grado || '',
     seccion: ficha.seccion || '',
     nivel_educativo: ficha.nivel_educativo || '',
-    estado_civil: ficha.estado_civil || 'SOLTERO',
+    estado_civil: ficha.estado_civil || 'soltero',
     num_hijos: ficha.num_hijos || 0,
     domicilio_actual: ficha.domicilio_actual || '',
     distrito: ficha.distrito || '',
@@ -181,7 +181,7 @@ export default function EditarFichaSocialPage() {
     grado: '',
     seccion: '',
     nivel_educativo: '',
-    estado_civil: 'SOLTERO',
+    estado_civil: 'soltero',
     num_hijos: 0,
     domicilio_actual: '',
     distrito: '',

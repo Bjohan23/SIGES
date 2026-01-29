@@ -23,7 +23,9 @@
       "Bash(find:*)",
       "Bash(npx prisma db execute:*)",
       "Bash(npx prisma db push:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(node -e \"const { execSync } = require\\(''child_process''\\); try { const result = execSync\\(''npm run build'', { encoding: ''utf-8'', stdio: ''pipe'' }\\); console.log\\(result\\); console.log\\(''BUILD SUCCESS''\\); } catch\\(e\\) { console.log\\(''STDOUT:'', e.stdout\\); console.log\\(''STDERR:'', e.stderr\\); console.log\\(''STATUS:'', e.status\\); }\")",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

@@ -10,12 +10,12 @@ import { UserService } from '@/services/UserService'
 import Navbar from '@/components/Navbar'
 import ErrorAlert from '@/components/ErrorAlert'
 import { fichaSocialAlerts } from '@/components/FichaSocialAlert'
-import type { User } from '@/types'
+import type { Usuario } from '@/types'
 
 export default function PerfilPage() {
   const router = useRouter()
   const { user, loading: authLoading, updateUser } = useAuth()
-  const [profile, setProfile] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isEditing, setIsEditing] = useState(false)
@@ -41,7 +41,7 @@ export default function PerfilPage() {
         setError('')
         const profileData = await UserService.getCurrentUserProfile()
         if (profileData) {
-          setProfile(profileData as User)
+          setProfile(profileData)
           setFormData({
             nombres: profileData.nombres || '',
             apellidos: profileData.apellidos || '',
@@ -93,7 +93,7 @@ export default function PerfilPage() {
         telefono: formData.telefono.trim(),
       })
 
-      setProfile(updatedProfile as User)
+      setProfile(updatedProfile)
 
         // Actualizar el contexto de autenticación
         if (updateUser) {
@@ -111,12 +111,12 @@ export default function PerfilPage() {
             apellidos: updatedProfile.apellidos,
             dni: updatedProfile.dni,
             distrito: '',
-            estado: 'ACTIVO',
+            estado: 'completa',
             porcentaje_completado: 100,
             created_at: updatedProfile.created_at,
             updated_at: updatedProfile.updated_at,
-            creador: null,
-            actualizador: null,
+            creador: undefined,
+            actualizador: undefined,
             _count: { entrevistas: 0 }
           },
           'Perfil actualizado correctamente',
@@ -302,12 +302,12 @@ export default function PerfilPage() {
                     </label>
                     <input
                       type="text"
-                      value={profile.rol?.nombre || ''}
+                      value={profile.rol_nombre || ''}
                       disabled
                       className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {profile.rol?.descripcion}
+                      {profile.rol_descripcion}
                     </p>
                   </div>
                 </div>
@@ -384,8 +384,8 @@ export default function PerfilPage() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Último inicio de sesión</p>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {profile.ultimo_login
-                      ? new Date(profile.ultimo_login).toLocaleDateString('es-PE', {
+                    {profile.ultimo_acceso
+                      ? new Date(profile.ultimo_acceso).toLocaleDateString('es-PE', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',

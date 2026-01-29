@@ -1,104 +1,109 @@
-'use client'
+'use client';
 
 // app/registros/registro-visita-domiciliaria/[id]/editar/page.tsx
 // Página para editar Registro de Visita Domiciliaria
 
-import { useState, useEffect, FormEvent } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { useAuth } from '@/context/AuthContext'
-import Navbar from '@/components/Navbar'
-import ErrorAlert from '@/components/ErrorAlert'
-import SuccessAlert from '@/components/SuccessAlert'
-import { RegistroVisitaDomiciliariaService, UpdateRegistroVisitaDomiciliariaData } from '@/services/RegistroVisitaDomiciliariaService'
-import type { RegistroVisitaDomiciliaria } from '@/services/RegistroVisitaDomiciliariaService'
+import { useState, useEffect, FormEvent } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import Navbar from '@/components/Navbar';
+import ErrorAlert from '@/components/ErrorAlert';
+import SuccessAlert from '@/components/SuccessAlert';
+import {
+  RegistroVisitaDomiciliariaService,
+  UpdateRegistroVisitaDomiciliariaData,
+} from '@/services/RegistroVisitaDomiciliariaService';
+import type { RegistroVisitaDomiciliaria } from '@/services/RegistroVisitaDomiciliariaService';
 
 export default function EditarRegistroVisitaDomiciliariaPage() {
-  const router = useRouter()
-  const params = useParams()
-  const { user, loading: authLoading } = useAuth()
+  const router = useRouter();
+  const params = useParams();
+  const { user, loading: authLoading } = useAuth();
 
-  const [registro, setRegistro] = useState<RegistroVisitaDomiciliaria | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [registro, setRegistro] = useState<RegistroVisitaDomiciliaria | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const [nombreEntrevistado, setNombreEntrevistado] = useState('')
-  const [domicilio, setDomicilio] = useState('')
-  const [fechaVisita, setFechaVisita] = useState('')
-  const [responsable, setResponsable] = useState('')
-  const [objetivo, setObjetivo] = useState('')
-  const [relato, setRelato] = useState('')
+  const [nombreEntrevistado, setNombreEntrevistado] = useState('');
+  const [domicilio, setDomicilio] = useState('');
+  const [fechaVisita, setFechaVisita] = useState('');
+  const [responsable, setResponsable] = useState('');
+  const [objetivo, setObjetivo] = useState('');
+  const [relato, setRelato] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/')
+      router.push('/');
     }
-  }, [user, authLoading, router])
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (params.id && user) {
-      loadRegistro(params.id as string)
+      loadRegistro(params.id as string);
     }
-  }, [params.id, user])
+  }, [params.id, user]);
 
   const loadRegistro = async (id: string) => {
     try {
-      setLoading(true)
-      const data = await RegistroVisitaDomiciliariaService.getRegistroVisitaDomiciliariaById(id)
-      setRegistro(data)
+      setLoading(true);
+      const data = await RegistroVisitaDomiciliariaService.getRegistroVisitaDomiciliariaById(id);
+      setRegistro(data);
 
       // Cargar datos en el formulario
-      setNombreEntrevistado(data.nombre_entrevistado || '')
-      setDomicilio(data.domicilio || '')
-      setFechaVisita(data.fecha_visita ? new Date(data.fecha_visita).toISOString().split('T')[0] : '')
-      setResponsable(data.responsable || '')
-      setObjetivo(data.objetivo || '')
-      setRelato(data.relato || '')
+      setNombreEntrevistado(data.nombre_entrevistado || '');
+      setDomicilio(data.domicilio || '');
+      setFechaVisita(
+        data.fecha_visita ? new Date(data.fecha_visita).toISOString().split('T')[0] : ''
+      );
+      setResponsable(data.responsable || '');
+      setObjetivo(data.objetivo || '');
+      setRelato(data.relato || '');
     } catch (err: any) {
-      setError(err.message || 'Error al cargar el registro de visita domiciliaria')
+      setError(err.message || 'Error al cargar el registro de visita domiciliaria');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
+    e.preventDefault();
+    setError('');
+    setSuccess('');
 
-    if (!registro) return
+    if (!registro) return;
 
     try {
-      setSaving(true)
+      setSaving(true);
 
       const data: UpdateRegistroVisitaDomiciliariaData = {
         nombre_entrevistado: nombreEntrevistado.trim() || undefined,
         domicilio: domicilio.trim() || undefined,
-        fecha_visita: fechaVisita ? new Date(fechaVisita) : undefined,
+        fecha_visita: fechaVisita || undefined,
         responsable: responsable.trim() || undefined,
         objetivo: objetivo.trim() || undefined,
         relato: relato.trim() || undefined,
-      }
+      };
 
-      await RegistroVisitaDomiciliariaService.updateRegistroVisitaDomiciliaria(registro.id, data)
-      setSuccess('Registro de visita domiciliaria actualizado exitosamente')
+      await RegistroVisitaDomiciliariaService.updateRegistroVisitaDomiciliaria(registro.id, data);
+      setSuccess('Registro de visita domiciliaria actualizado exitosamente');
       setTimeout(() => {
-        router.push(`/registros/registro-visita-domiciliaria/${registro.id}`)
-      }, 1500)
+        router.push(`/registros/registro-visita-domiciliaria/${registro.id}`);
+      }, 1500);
     } catch (err: any) {
-      setError(err.message || 'Error al actualizar el registro de visita domiciliaria')
+      setError(err.message || 'Error al actualizar el registro de visita domiciliaria');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   if (authLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -111,7 +116,7 @@ export default function EditarRegistroVisitaDomiciliariaPage() {
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   if (error && !registro) {
@@ -129,7 +134,7 @@ export default function EditarRegistroVisitaDomiciliariaPage() {
           </button>
         </main>
       </div>
-    )
+    );
   }
 
   return (
@@ -279,5 +284,5 @@ export default function EditarRegistroVisitaDomiciliariaPage() {
         </form>
       </main>
     </div>
-  )
+  );
 }

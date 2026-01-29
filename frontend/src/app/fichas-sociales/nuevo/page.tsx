@@ -266,7 +266,7 @@ function FormContent() {
                     apellidos: '',
                     dni: '',
                     distrito: '',
-                    estado: 'INCOMPLETA' as const,
+                    estado: 'incompleta' as const,
                     porcentaje_completado: progress,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),

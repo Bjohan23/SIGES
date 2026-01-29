@@ -27,8 +27,12 @@ export interface Usuario {
   auth_user_id: string
   email: string
   nombre_completo: string
+  nombres?: string
+  apellidos?: string
+  dni?: string
   telefono?: string
   activo: boolean
+  email_verificado?: boolean
   ultimo_acceso?: string
   rol_id: string
   rol_nombre?: string
@@ -43,6 +47,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
+  updateUser?: (userData: Partial<Usuario>) => void
 }
 
 // Tipos para datos anidados en JSONB
@@ -160,6 +165,21 @@ export interface FichaSocial {
   updated_by: string
   created_at: string
   updated_at: string
+  creador?: {
+    id: string
+    nombres: string
+    apellidos: string
+    email: string
+  }
+  actualizador?: {
+    id: string
+    nombres: string
+    apellidos: string
+    email: string
+  }
+  _count?: {
+    entrevistas: number
+  }
 }
 
 export interface EntrevistaAplicada {
